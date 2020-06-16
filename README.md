@@ -29,6 +29,3 @@ CONTACT
 
 Niraj S. Desai (NSD, niraj.desai3@nih.gov)
 
-![](patchclamp/images/screenshot.jpg)
-
-
