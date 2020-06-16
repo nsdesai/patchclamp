@@ -28,3 +28,6 @@ THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 CONTACT
 
 Niraj S. Desai (NSD, niraj.desai3@nih.gov)
+
+
+![](images/https://github.com/nsdesai/patchclamp/blob/master/images/screenshot.png)
