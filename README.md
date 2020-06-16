@@ -6,6 +6,7 @@ REQUIREMENTS
 Software:     Matlab (2019a or later) and Matlab's Data Acquisition Toolbox (version 4.1 or later) 
 
 Hardware:     National Instruments board or another data acquisition board supported by Matlab's Data Acquisition Toolbox
+
               Patch clamp amplifiers; this software was written for Multiclamp 700B and 700B but will work with other amplifier
 
 
