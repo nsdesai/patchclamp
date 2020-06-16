@@ -2,14 +2,20 @@
 Data acquisition software for patch clamp neurophysiology
 
 REQUIREMENTS
+
 Software:     Matlab (2019a or later) and Matlab's Data Acquisition Toolbox (version 4.1 or later) 
+
 Hardware:     National Instruments board or another data acquisition board supported by Matlab's Data Acquisition Toolbox
               Patch clamp amplifiers; this software was written for Multiclamp 700B and 700B but will work with other amplifier
-              
+
+
 LICENSE
+
 This software was written for the Laboratory of Circuits, Synapses, and Molecular Signaling (LCSMS) at the National Institute of Neurological Disorders and Stroke (NINDS). Permission is granted, subject to terms of the GNU Public License 3.0, for others to download, use, modify, and distribute the software, as long as it remains open source and the same permissions apply. 
 
+
 DISCLAIMER
+
 % THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 % OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
 % MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
@@ -18,11 +24,19 @@ DISCLAIMER
 % OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR 
 % THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
 CONTACT
+
 Niraj S. Desai, Ph.D.
+
 Staff Scientist
+
 Laboratory of Circuits, Synapses, and Molecular Signaling
+
 National Institute of Neurological Disorders and Stroke
+
 Building 35A, Room 3B1010
+
 Bethesda, MD 20892
+
 E-mail: niraj.desai3@nih.gov
