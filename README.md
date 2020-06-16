@@ -2,6 +2,9 @@
 Data acquisition software for patch clamp neurophysiology
 
 
+![](images/screenshot.png)
+
+
 REQUIREMENTS
 
 Software:     Matlab (2019a or later) and Matlab's Data Acquisition Toolbox (version 4.1 or later) 
