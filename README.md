@@ -27,16 +27,4 @@ DISCLAIMER
 
 CONTACT
 
-Niraj S. Desai, Ph.D.
-
-Staff Scientist
-
-Laboratory of Circuits, Synapses, and Molecular Signaling
-
-National Institute of Neurological Disorders and Stroke
-
-Building 35A, Room 3B1010
-
-Bethesda, MD 20892
-
-E-mail: niraj.desai3@nih.gov
+Niraj S. Desai (NSD, niraj.desai3@nih.gov)
