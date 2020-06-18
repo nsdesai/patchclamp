@@ -10,19 +10,14 @@ global DAQPARS
 
 app = DAQPARS.MainApp;
 
-if ~nargin || ~exist(fileName,'file')
-    filePath = [DAQPARS.daqFolder,'\user_files\outputs\'];
-    try
-        load([filePath,fileName]); %#ok<*LOAD>
-    catch
-        warndlg('Please check file name', 'File not found');
-        error('File was not found');
-    end
-else
+try
     filePath = [DAQPARS.daqFolder,'\user_files\outputs\'];
     oldFolder = cd(filePath);
-    load(fileName);     % the values are saved in a struct called "outputs"
+    load(fileName);     %#ok<LOAD> % the values are saved in a struct called "outputs"
     cd(oldFolder)
+catch
+    warndlg('Please check file name', 'File not found');
+    error('File was not found');
 end
 
 try
