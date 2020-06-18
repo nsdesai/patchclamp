@@ -317,7 +317,7 @@ else
     stop(daqObj)
     delete(daqObj)
     if stopBackground
-        if backgroundCounter > 1
+        if backgroundCounter < nTotalSteps
             removeextradata(backgroundCounter-1);
         end
     end
@@ -344,6 +344,7 @@ else
         end
     end
     set(DAQPARS.MainApp.startButton,'Text','start')
+    app.Recording = false;
 end
 
 stopBackground = [];
