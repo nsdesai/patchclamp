@@ -10,19 +10,14 @@ global DAQPARS
 
 app = DAQPARS.MainApp;
 
-if ~nargin || ~exist(fileName,'file')
-    filePath = [DAQPARS.daqFolder,'\user_files\parameters\'];
-    try
-        pars = load([filePath,fileName]);
-    catch
-        warndlg('Please check file name', 'File not found');
-        error('File was not found');
-    end
-else
+try
     filePath = [DAQPARS.daqFolder,'\user_files\parameters\'];
     oldFolder = cd(filePath);
     pars = load(fileName);
     cd(oldFolder);
+catch
+    warndlg('Please check file name', 'File not found');
+    error('File was not found');
 end
 
 try
