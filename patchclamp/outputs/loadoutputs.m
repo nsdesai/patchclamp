@@ -19,7 +19,10 @@ if ~nargin || ~exist(fileName,'file')
         error('File was not found');
     end
 else
+    filePath = [DAQPARS.daqFolder,'\user_files\outputs\'];
+    oldFolder = cd(filePath);
     load(fileName);     % the values are saved in a struct called "outputs"
+    cd(oldFolder)
 end
 
 try
