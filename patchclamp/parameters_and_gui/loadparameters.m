@@ -19,7 +19,10 @@ if ~nargin || ~exist(fileName,'file')
         error('File was not found');
     end
 else
+    filePath = [DAQPARS.daqFolder,'\user_files\parameters\'];
+    oldFolder = cd(filePath);
     pars = load(fileName);
+    cd(oldFolder);
 end
 
 try
