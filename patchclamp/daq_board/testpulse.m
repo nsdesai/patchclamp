@@ -90,9 +90,9 @@ N = minScansAvailable; % N is shorter than minScansAvailable
 testObj = daq("ni");
 testObj.Rate = sampleRate;
 aiChannels = DAQPARS.daqBoardChannels(1,idx);
-addinput(testObj,DAQPARS.daqBoardInfo(DAQPARS.daqBoardIdx).ID,aiChannels,"Voltage");
+addinput(testObj,DAQPARS.daqBoardInfo.ID,aiChannels,"Voltage");
 aoChannels = DAQPARS.daqBoardChannels(2,idx);
-addoutput(testObj,DAQPARS.daqBoardInfo(DAQPARS.daqBoardIdx).ID,aoChannels,"Voltage");
+addoutput(testObj,DAQPARS.daqBoardInfo.ID,aoChannels,"Voltage");
 testObj.ScansAvailableFcnCount = N;
 testObj.ScansAvailableFcn = @plottestdata;
 
