@@ -13,19 +13,17 @@ s = daq("ni");
 
 s.Rate = DAQPARS.sampleRate;
 
-idx = DAQPARS.daqBoardIdx; % identifier of the NIDAQ board to use
-
 aiChannels = DAQPARS.daqBoardChannels(1,DAQPARS.inputChannels);
-addinput(s,DAQPARS.daqBoardInfo(idx).ID,aiChannels,"Voltage")
+addinput(s,DAQPARS.daqBoardInfo.ID,aiChannels,"Voltage")
  
 for ii = DAQPARS.outputChannels
     
     if ii<5     % analog
         aoChannel = char(DAQPARS.daqBoardChannels(2,ii));        
-        addoutput(s,DAQPARS.daqBoardInfo(idx).ID,aoChannel,'Voltage');
+        addoutput(s,DAQPARS.daqBoardInfo.ID,aoChannel,'Voltage');
     else        % digital
         dioChannel = char(DAQPARS.daqBoardChannels(2,ii));
-        addoutput(s,DAQPARS.daqBoardInfo(idx).ID,dioChannel,'Digital');
+        addoutput(s,DAQPARS.daqBoardInfo.ID,dioChannel,'Digital');
     end
     
 end
