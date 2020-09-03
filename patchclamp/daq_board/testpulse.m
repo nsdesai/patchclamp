@@ -13,16 +13,28 @@ function [] = testpulse(app)
 % INPUTS
 % app:      handle to the main acquisition app
 %
-% Niraj S. Desai (NSD), 06/06/2020.
+% Niraj S. Desai (NSD), 09/01/2020.
 
 global DAQPARS testObj
 
 % if the test pulse is going and the user wants to stop it, they press the
 % "test" button a second time. This sets app.TestPulse to false and
 % triggers this daqreset and return
-if ~app.TestPulse   
+if ~app.TestPulse 
+    testObj = daq("ni");
+    testChannels = app.UITestPulse.Data;
+    aoChannels = DAQPARS.daqBoardChannels(2,testChannels);
+    addoutput(testObj,DAQPARS.daqBoardInfo.ID,aoChannels,"Voltage");
+    outputs = zeros(1,numel(aoChannels));
+    write(testObj,outputs)
     daqreset
     return
+end
+
+% clear the calculated resistance values in the GUI
+for jj = 1:4
+    fStr = ['channel',num2str(jj),'REditField'];
+    app.(fStr).Value = 0;
 end
 
 % sample rate and amplifier information; we always use 10 kHz for this
@@ -44,9 +56,9 @@ if isempty(find(testChannels, 1))
     return
 end
 
-% check that the selected channels are in voltage clamp or current clamp;
-% get the gains for those two conditions
-outputGains = ones(numel(testChannels),1);
+% check that the selected channels are in voltage clamp
+% get the gains for this condition
+outputGains = ones(1,numel(testChannels));
 inputGains = outputGains;
 for ii = 1:numel(testChannels)
     if testChannels(ii)
@@ -58,12 +70,8 @@ for ii = 1:numel(testChannels)
                 outputGains(ii) = ampInfoChannel.outputScalingVoltageClamp;
                 inputGains(ii) = ...
                     channelGain/ampInfoChannel.inputScalingVoltageClamp;
-            case 'current clamp'
-                outputGains(ii) = ampInfoChannel.outputScalingCurrentClamp;
-                inputGains(ii) = ...
-                    channelGain/ampInfoChannel.inputScalingCurrentClamp;
             otherwise
-                warndlg('All test channels must be in voltage or current clamp','Check parameters')
+                warndlg('All test channels must be in voltage clamp','Check parameters')
                 app.testButton.Text = 'test';
                 return
         end
@@ -71,12 +79,12 @@ for ii = 1:numel(testChannels)
 end
 
 % create the test pulses
-idx = find(testChannels);
-outputs = zeros(round(totalLength/dt),numel(idx));
+channelIdx = find(testChannels);
+outputs = zeros(round(totalLength/dt),numel(channelIdx));
 pulseStart = round(pulseBuffer/dt);
 pulseEnd = pulseStart + round(duration/dt);
-for mm = 1:numel(idx)
-    outputs(pulseStart:pulseEnd,:) = amplitude / outputGains(idx(mm));
+for mm = 1:numel(channelIdx)
+    outputs(pulseStart:pulseEnd,:) = amplitude / outputGains(channelIdx(mm));
 end
 minPreload = ceil(sampleRate/2); % minimum number of samples for preload function
 minScansAvailable = max(ceil(sampleRate/10),length(outputs)); % maximum counts to trigger ScanAvailableFcn
@@ -84,58 +92,65 @@ if length(outputs)<minPreload
     replicates = ceil(minPreload/length(outputs));
     outputs = repmat(outputs,replicates,1);
 end
-N = minScansAvailable; % N is shorter than minScansAvailable
+N = minScansAvailable; % N may be shorter than outputs
 
 % create DAQ object
 testObj = daq("ni");
 testObj.Rate = sampleRate;
-aiChannels = DAQPARS.daqBoardChannels(1,idx);
+aiChannels = DAQPARS.daqBoardChannels(1,channelIdx);
 addinput(testObj,DAQPARS.daqBoardInfo.ID,aiChannels,"Voltage");
-aoChannels = DAQPARS.daqBoardChannels(2,idx);
+aoChannels = DAQPARS.daqBoardChannels(2,channelIdx);
 addoutput(testObj,DAQPARS.daqBoardInfo.ID,aoChannels,"Voltage");
+dataTemp = readwrite(testObj,outputs,"OutputFormat","Matrix"); % used to set y-axis scale
+dataTemp = dataTemp ./ repmat(inputGains(channelIdx),length(dataTemp),1);
 testObj.ScansAvailableFcnCount = N;
-testObj.ScansAvailableFcn = @plottestdata;
+testObj.ScansAvailableFcn = @(src,evt) plottestdata(src,app,channelIdx,pulseStart,amplitude,inputGains);
 
 % figure out where to plot the recordings
 app.UIPlottingChannels.Data = false(2,8);
-if numel(idx)== 1
-    app.UIPlottingChannels.Data(1,idx) = true;
-elseif numel(idx) == 2
-    app.UIPlottingChannels.Data(1,idx(1)) = true;
-    app.UIPlottingChannels.Data(2,idx(2)) = true;
-elseif numel(idx) == 3
-    app.UIPlottingChannels.Data(1,idx(1:2)) = true;
-    app.UIPlottingChannels.Data(2,idx(3)) = true;
+if numel(channelIdx)== 1
+    app.UIPlottingChannels.Data(1,channelIdx) = true;
+elseif numel(channelIdx) == 2
+    app.UIPlottingChannels.Data(1,channelIdx(1)) = true;
+    app.UIPlottingChannels.Data(2,channelIdx(2)) = true;
+elseif numel(channelIdx) == 3
+    app.UIPlottingChannels.Data(1,channelIdx(1:2)) = true;
+    app.UIPlottingChannels.Data(2,channelIdx(3)) = true;
 else
-    app.UIPlottingChannels.Data(1,idx(1:2)) = true;
-    app.UIPlottingChannels.Data(2,idx(3:4)) = true;
+    app.UIPlottingChannels.Data(1,channelIdx(1:2)) = true;
+    app.UIPlottingChannels.Data(2,channelIdx(3:4)) = true;
 end
 [xPlot,~] = find(app.UIPlottingChannels.Data);
 
 % get the graphs ready
 cla(app.UIInputAxes1); cla(app.UIInputAxes2);
 load('plottingColors.mat','colors')  % this is in the parameters_and_gui folder
-for jj = 1:numel(idx)
+for jj = 1:numel(channelIdx)
     ax = ['UIInputAxes',num2str(xPlot(jj))];
     ax = app.(ax);
-    color = colors(idx(jj),:);
-    plotHandle(jj) = plot(ax,(1:N)*dt,zeros(N,1),'color',color); %#ok<AGROW>
+    color = colors(channelIdx(jj),:);
+    plotHandle(jj) = plot(ax,(1:N)*dt,dataTemp(1:N,jj),'color',color); %#ok<AGROW>
 end
 xlim(app.UIInputAxes1,[0 N*dt])
 xlim(app.UIInputAxes2,[0 N*dt])
+yLimit = min(5000, 1.25*max(abs(dataTemp(:))));
+ylim(app.UIInputAxes1,[-yLimit yLimit])
+ylim(app.UIInputAxes2,[-yLimit yLimit])
 
 % preload output data and start DAQ object
 preload(testObj,outputs)
 start(testObj,"RepeatOutput")
 
-    % function that reads the data and plots it
-    function [] = plottestdata(obj,~)
-        
+% function that reads the data and plots it
+    function [] = plottestdata(obj,app,idx,pulseStart,amplitude,inputGains)
         data = read(obj,obj.ScansAvailableFcnCount,"OutputFormat","Matrix");
         for kk = 1:size(data,2)
-            plotHandle(kk).YData = data(:,kk);
+            plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
+            fStr = ['channel',num2str(idx(kk)),'REditField'];
+            deflection = mean(data(pulseStart+25:pulseStart+50,kk)) - mean(data(25:50,kk));
+            R = round(abs(1000*amplitude/deflection)); % MOhms
+            app.(fStr).Value = R;
         end
-        
     end
 
 end
