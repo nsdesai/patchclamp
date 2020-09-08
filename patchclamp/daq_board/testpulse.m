@@ -95,6 +95,7 @@ end
 N = minScansAvailable; % N may be shorter than outputs
 
 % create DAQ object
+daqreset
 testObj = daq("ni");
 testObj.Rate = sampleRate;
 aiChannels = DAQPARS.daqBoardChannels(1,channelIdx);

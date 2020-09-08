@@ -140,10 +140,11 @@ else
     progressFigure = [];
     progressDialog = [];
 end
-drawnow
+drawnow limitrate
 
 
 % create the data acquisition object
+daqreset
 daqObj = nidaqboard;
 
 
