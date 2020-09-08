@@ -43,3 +43,4 @@ else % move data to temp folder and append time
 end 
 stopBackground = [];
 DAQPARS.MainApp.Recording = false;
+
