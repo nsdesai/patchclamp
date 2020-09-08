@@ -22,7 +22,6 @@ if (nargin==0)                          % initialize
     % (e.g., C:\Users\MyName\Documents\MATLAB\patchclamp).
     workFolder = userpath;
     
-    
     DAQPARS.daqFolder = [workFolder(1:end),'\patchclamp'];
     assert(isfolder(DAQPARS.daqFolder),...
         'The folder containing the DAQ files could not be found.')
@@ -34,6 +33,10 @@ if (nargin==0)                          % initialize
     daqreset                            % delete any active daq objects
     
     
+    if isfield(DAQPARS,'MainApp')
+        disp('LCSMS_patch_clamp is already open.')
+        return
+    end
     opendaqfigure                       % open GUI with default parameters
  
     
