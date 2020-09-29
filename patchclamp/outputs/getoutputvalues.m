@@ -45,11 +45,11 @@ if ~isempty(p.activeLines)
         end
     end
     MainApp.durationEditField.Value = p.duration;
-    if (p.duration+minTimeBetweenTraces)>p.period          % period must be longer than duration
-        p.period = p.duration + minTimeBetweenTraces;
-        MainApp.periodEditField.Value = p.period;
-    end
-        
+end
+
+if (p.duration+minTimeBetweenTraces)>p.period          % period must be longer than duration
+    p.period = p.duration + minTimeBetweenTraces;
+    MainApp.periodEditField.Value = p.period;
 end
 
 foo = cell2struct(outputStr,outputFields,2);
