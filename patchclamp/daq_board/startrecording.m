@@ -114,7 +114,6 @@ load('plottingColors.mat','colors')  % this is in the parameters_and_gui folder
 
 
 % get input windows ready
-ax = [DAQPARS.MainApp.UIInputAxes1, DAQPARS.MainApp.UIInputAxes2];
 ax1 = ones(numel(DAQPARS.inputChannels),1);
 for iCount = 1:numel(DAQPARS.inputChannels)
     foo = find(displayButtons(:,...
@@ -126,6 +125,7 @@ for iCount = 1:numel(DAQPARS.inputChannels)
         ax1(iCount) = foo;
     end
 end
+[ax,popup] = chooseaxes(ax1);
 
 
 % get ready to go
@@ -233,8 +233,10 @@ if DAQPARS.duration <= 2000     % user timer and startForeground for short sweep
             'color',colors(DAQPARS.inputChannels(iCount),:)); %#ok<*SAGROW,*NASGU>
     end
     hold(ax(1),'off'); hold(ax(2),'off')
-    xlim(ax(1),[0 DAQPARS.duration]);
-    xlim(ax(2),[0 DAQPARS.duration]);
+    if ~popup
+        xlim(ax(1),[0 DAQPARS.duration]);
+        xlim(ax(2),[0 DAQPARS.duration]);
+    end
     niTimer = timer('TimerFcn',...
         {@startdaq,daqObj,inputGains,outputGains,progressDialog,plotHandle,recordingMode},...
         'StopFcn',{@stopdaq,daqObj,progressDialog,progressFigure},...
@@ -254,8 +256,10 @@ else
                 'color',colors(DAQPARS.inputChannels(iCount),:));
         end
         hold(ax(1),'off'); hold(ax(2),'off')
-        xlim(ax(1),[0 DAQPARS.duration]);
-        xlim(ax(2),[0 DAQPARS.duration]);
+        if ~popup
+            xlim(ax(1),[0 DAQPARS.duration]);
+            xlim(ax(2),[0 DAQPARS.duration]);
+        end
         output1 = squeeze(outputData(:,DAQPARS.orderOfSteps(recordingCounter),:)) ...
             ./ repmat(outputGains,size(outputData,1),1);
         preload(daqObj, output1);
