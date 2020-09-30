@@ -21,7 +21,6 @@ else
     for jj= 1:N
         name = amplifierInfo(jj).name;
         foo = strfind(name,'_');
-        name(foo(2)+1:end)
         serialStr = name(foo(2)+1:end);
         serialNumber(jj) = str2double(serialStr);
     end
