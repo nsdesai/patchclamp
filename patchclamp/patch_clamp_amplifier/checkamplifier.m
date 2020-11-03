@@ -14,6 +14,7 @@ function [amplifierOkay] = checkamplifier(amplifierInfo,amplifierIdx)
 %
 % OUTPUTS
 % amplifierOkay:     true or false   (amplifier)
+global DAQPARS
 
 amplifierOkay = true;
 
@@ -29,22 +30,34 @@ for ii = 1:nChannels
     idx = amplifierIdx(ii);
     specifiedID = amplifierInfo(idx).ID;
     if idx > 4, continue, end       % ignore manual settings
-    if ~ismember(specifiedID, detectedIDs)
-        amplifierOkay = false;
-        disp('Specified Multiclamp amplifier channels were not detected. ...')
+    sStr = ['statusDropDown_',num2str(ii)];
+    eStr = ['enableSwitch_',num2str(ii)];
+    if ismember(specifiedID, detectedIDs)
+        if ii==1
+            DAQPARS.MainApp.(eStr).Value = 'enable'; % we assume channel 1 is always in use
+            DAQPARS.MainApp.(sStr).Enable = true;
+        else
+            DAQPARS.MainApp.(eStr).Value = 'disable'; % other channels might not be in use
+            DAQPARS.MainApp.(sStr).Value = 'off';
+            DAQPARS.MainApp.(sStr).Enable = false;
+        end
+        DAQPARS.MainApp.(eStr).Enable = true;
+        disp(' ')
+        disp(['Channel ',num2str(idx),' is CONNECTED to an active Multiclamp ammplifier and is ready to use.'])
+        disp(' ')
+    else
+        DAQPARS.MainApp.(sStr).Value = 'off';
+        DAQPARS.MainApp.(sStr).Enable = false;
+        DAQPARS.MainApp.(eStr).Value = 'disable';
+        DAQPARS.MainApp.(eStr).Enable = false;
+        disp(' ')
+        disp(['Channel ',num2str(idx),' is NOT CONNECTED to an active Multiclamp amplifier and has been disabled.'])
+        disp('If you wish to use it, turn on the associated Multiclamp amplifier, open the Commander window, and again type patchclamp at the Matlab command line.')
+        disp(' ')
     end
     
 end
 
-if ~amplifierOkay
-    answer = ...
-        questdlg('Choices: (1) open Multiclamp Commander windows and then press RETRY or (2) SELECT a new hardware configuration.',...
-        'Multiclamp amplifiers not detected','Retry',...
-        'Select hardware','Retry');
-    if strcmp(answer,'Retry')
-        amplifierOkay = checkamplifier(amplifierInfo,amplifierIdx);
-    end
-end
         
     
     
