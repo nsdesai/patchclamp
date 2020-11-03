@@ -10,8 +10,8 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
     s = ['statusDropDown_',num2str(ii)];
     g = ['gainDropDown_',num2str(ii)];
     h = ['holdingEditField_',num2str(ii)];
-    
-    if strcmp(app.(s).Value, 'off')
+
+    if app.(s).Enable==false
         continue
     end
     
