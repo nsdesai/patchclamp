@@ -147,8 +147,9 @@ start(testObj,"RepeatOutput")
         data = read(obj,obj.ScansAvailableFcnCount,"OutputFormat","Matrix");
         for kk = 1:size(data,2)
             plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
+            dataTemp = plotHandle(kk).YData;
             fStr = ['channel',num2str(idx(kk)),'REditField'];
-            deflection = mean(data(pulseStart+25:pulseStart+50,kk)) - mean(data(25:50,kk));
+            deflection = mean(dataTemp(pulseStart+25:pulseStart+50)) - mean(dataTemp(25:50));
             R = round(abs(1000*amplitude/deflection)); % MOhms
             app.(fStr).Value = R;
         end
