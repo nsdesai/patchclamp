@@ -259,6 +259,7 @@ else
         if ~popup
             xlim(ax(1),[0 DAQPARS.duration]);
             xlim(ax(2),[0 DAQPARS.duration]);
+            axis 'auto y'
         end
         output1 = squeeze(outputData(:,DAQPARS.orderOfSteps(recordingCounter),:)) ...
             ./ repmat(outputGains,size(outputData,1),1);
@@ -279,6 +280,7 @@ else
         end
         DAQPARS.triggerTime(backgroundCounter) = triggerTime;
         pause(0.2) % give plotinputs time to finish
+        input1 = output1;
         for jCount = 1:numel(DAQPARS.inputChannels)
             input1(:,jCount) = get(plotHandle(jCount),'YData');
         end
@@ -311,9 +313,6 @@ else
         end
         while (daqObj.NumScansQueued>0), drawnow limitrate; end 
         while (daqObj.NumScansAvailable>0), drawnow limitrate; end
-        for jCount = 1:numel(DAQPARS.inputChannels)
-            input1(:,jCount) = get(plotHandle(jCount),'YData');
-        end
         if ~isempty(progressDialog)
             progressDialog.Value = recordingCounter / nTotalSteps;
         end
@@ -323,7 +322,7 @@ else
     delete(daqObj)
     if stopBackground
         if backgroundCounter < nTotalSteps
-            removeextradata(backgroundCounter-1);
+            removeextradata(backgroundCounter);
         end
     end
     if ~isempty(progressFigure)
@@ -331,22 +330,18 @@ else
         close(progressFigure);
     end
     drawnow
-    if stopBackground && backgroundCounter==1
-        % do not update trial number if nothing saved
-    else
-        if DAQPARS.MainApp.savedataCheckBox.Value
-            newexperiment('next trial')
-        else % move data to temp folder and append time
-            descriptor = DAQPARS.MainApp.descriptorEditField.Value;
-            if isempty(descriptor)
-                fName = [DAQPARS.fileName,'.mat'];
-            else
-                fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
-            end
-            fName1 = [DAQPARS.saveDirectory,fName];
-            tempName = [DAQPARS.saveDirectory,'temp\',datestr(now,30),'_',fName];
-            movefile(fName1, tempName)
+    if DAQPARS.MainApp.savedataCheckBox.Value
+        newexperiment('next trial')
+    else % move data to temp folder and append time
+        descriptor = DAQPARS.MainApp.descriptorEditField.Value;
+        if isempty(descriptor)
+            fName = [DAQPARS.fileName,'.mat'];
+        else
+            fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
         end
+        fName1 = [DAQPARS.saveDirectory,fName];
+        tempName = [DAQPARS.saveDirectory,'temp\',datestr(now,30),'_',fName];
+        movefile(fName1, tempName)
     end
     set(DAQPARS.MainApp.startButton,'Text','start')
     app.Recording = false;
