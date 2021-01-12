@@ -280,7 +280,7 @@ else
         end
         DAQPARS.triggerTime(backgroundCounter) = triggerTime;
         pause(0.2) % give plotinputs time to finish
-        input1 = output1;
+        input1 = zeros(size(output1,1),numel(DAQPARS.inputChannels));
         for jCount = 1:numel(DAQPARS.inputChannels)
             input1(:,jCount) = get(plotHandle(jCount),'YData');
         end
