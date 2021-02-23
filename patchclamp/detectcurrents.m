@@ -1,4 +1,4 @@
-function [analyzedData,totalDuration,eventSamplePoints] = detectcurrents(data,ap,dt)
+function [analyzedData,totalDuration,eventSamplePoints] = detectcurrents(data,holding,ap,dt)
 
 analyzedData.clipped = [];
 analyzedData.amp = [];
@@ -10,6 +10,10 @@ analyzedData.peakPt = [];
 totalDuration = [];
 eventSamplePoints = [];
 if isempty(data), return, end
+
+% identify the series resistance test pulse, to ignore events near it
+testPulsePts = find(holding~=mode(holding));
+testPulsePts = unique([testPulsePts, testPulsePts - round(100)]);
 
 if ap.sixtyHz
     try     % 60 Hz notch filter
@@ -161,6 +165,16 @@ rTime(areaEvent<minArea)=[];
 clipped(areaEvent<minArea,:)=[];
 areaEvent(areaEvent<minArea)=[];
 
+
+% Exclude events during or within 20 msec of the test pulse
+excludedPts = find(ismember(tPts4,testPulsePts));
+tPts4(excludedPts) = [];
+startPt(excludedPts)=[];
+secondPeak(excludedPts)=[];
+rTime(excludedPts)=[];
+clipped(excludedPts,:)=[];
+areaEvent(excludedPts)=[];
+
 % Calculate amplitude of each event
 ampEvent = zeros(length(tPts4),1);
 for iCount = 1:length(tPts4)
@@ -175,6 +189,8 @@ if ap.synapticDirection==1
     data = -data;
     clipped = -clipped;
 end
+
+clipped = clipped(:,1:round(60/dt));
 
 totalDuration = length(data)*dt/1000;
 eventSamplePoints = size(clipped,2);
