@@ -43,7 +43,7 @@ for ii = 1:nChannels
         end
         DAQPARS.MainApp.(eStr).Enable = true;
         disp(' ')
-        disp(['Channel ',num2str(idx),' is CONNECTED to an active Multiclamp ammplifier and is ready to use.'])
+        disp(['Channel ',num2str(idx),' is CONNECTED to an active Multiclamp amplifier and is ready to use.'])
         disp(' ')
     else
         DAQPARS.MainApp.(sStr).Value = 'off';
