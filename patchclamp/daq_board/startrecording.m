@@ -132,10 +132,11 @@ end
 set(app.startButton,'Text','stop')
 if DAQPARS.repetitions > 1
     progressFigure = uifigure;
-    progressFigure.Position = [150 50 400 80];
+    progressFigure.Position = [150 50 400 120];
     progressFigure.Name = 'PROGRESS';
     progressDialog = uiprogressdlg(progressFigure,'Title','Acquiring ...');
     progressDialog.Value = 0;
+    progressDialog.Message = ['Completed 0 of ',num2str(nTotalSteps)];
 else
     progressFigure = [];
     progressDialog = [];
@@ -311,10 +312,12 @@ else
         if stopBackground
             break
         end
-        while (daqObj.NumScansQueued>0), drawnow limitrate; end 
+        while (daqObj.NumScansQueued>0), drawnow limitrate; end
         while (daqObj.NumScansAvailable>0), drawnow limitrate; end
         if ~isempty(progressDialog)
             progressDialog.Value = recordingCounter / nTotalSteps;
+            progressDialog.Message = ['Completed ',num2str(recordingCounter),' of ',num2str(nTotalSteps)];
+            
         end
         recordingCounter = recordingCounter + 1;
     end
@@ -325,7 +328,7 @@ else
             removeextradata(backgroundCounter);
         end
     end
-    if ~isempty(progressFigure)
+    if ishandle(progressFigure)
         close(progressDialog);
         close(progressFigure);
     end
