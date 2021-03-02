@@ -18,8 +18,7 @@ else          % 'new experiment'
     cla(DAQPARS.MainApp.UIAxesSeriesResistance)
 end
 
-DAQPARS.MainApp.experimentNumberEditField.Value = num2str(DAQPARS.experimentNo);
-DAQPARS.MainApp.trialNumberEditField.Value = num2str(DAQPARS.trialNo);
-
+DAQPARS.MainApp.experimentNumberEditField.Value = DAQPARS.experimentNo;
+DAQPARS.MainApp.trialNumberEditField.Value = DAQPARS.trialNo;
 
 makefilename

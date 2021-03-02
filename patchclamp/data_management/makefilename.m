@@ -24,7 +24,7 @@ if nargin   % when GUI is started, make sure filename does not already ...
         if bar>baz, baz=bar; end
     end
     DAQPARS.experimentNo = max(1,baz+1);
-    DAQPARS.MainApp.experimentNumberEditField.Value = num2str(DAQPARS.experimentNo);
+    DAQPARS.MainApp.experimentNumberEditField.Value = DAQPARS.experimentNo;
     eNo = num2str(DAQPARS.experimentNo,'%03i');   
     fileName = ['experiment',eNo,'trial',tNo];
 end
