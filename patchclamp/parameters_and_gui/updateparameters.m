@@ -32,8 +32,8 @@ for ii = 1:nChannels
     
 end
 
-DAQPARS.experimentNo = str2double(eNo);
-DAQPARS.trialNo = str2double(tNo);
+DAQPARS.experimentNo = eNo;
+DAQPARS.trialNo = tNo;
 DAQPARS.sampleRate = sampleRate;
 DAQPARS.channelStatus = status;
 DAQPARS.channelGain = gain;
