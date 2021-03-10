@@ -4,8 +4,8 @@ current = params.current;
 dt = params.dt;
 
 Vm = mean(data(1:params.pulsePts(1)-1));
-deflection = round(mean(data(params.pulsePts(2)-round(20/dt):params.pulsePts(2)-1)) - Vm);
-Rn = 1000*deflection/current; % megaohms
+deflection = mean(data(params.pulsePts(2)-round(20/dt):params.pulsePts(2)-1)) - Vm;
+Rn = abs(1000*deflection/current); % megaohms
 
 ydata = data(params.pulsePts(1):params.pulsePts(2)-round(50/dt));
 xdata = (1:length(ydata))*dt - dt;
