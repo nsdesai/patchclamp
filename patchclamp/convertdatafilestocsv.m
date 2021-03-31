@@ -6,8 +6,9 @@ if nargin<2
     folderName = pwd;
 end
 
-% arguments: sample points, steps/sweeps, output channel (if more than 1) 
-outputData = outputData(:,Pars.orderOfSteps,:);
+% arguments: sample points, steps/sweeps, output channel (if more than 1)
+steps = Pars.orderOfSteps(1:size(inputData,2));
+outputData = outputData(:,steps,:);
 
 inputChannels = Pars.inputChannels;
 
@@ -26,7 +27,7 @@ for ii = 1:numel(inputChannels)
     newFileName = [Pars.fileName(14:21),'_channel',num2str(chan)];
     dataInput = inputData(:,:,ii);
     [boo,bar] = ismember(Pars.inputChannels,Pars.outputChannels);
-    if ~isempty(boo)
+    if boo
         dataOutput = outputData(:,:,bar);
     end
     status = Pars.channelStatus{chan};

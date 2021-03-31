@@ -26,7 +26,7 @@ if ap.sixtyHz
     end
 end
 
-if ap.synapticDirection==1
+if ap.synapticNonEvokedDirection==1
     data = -data;
 end
 
@@ -185,7 +185,7 @@ end
 % if we flipped the sign of the data traces -- because we wanted to
 % detected outward currents rather than inward currents -- we flip them and
 % the resulting analyzed traces back before plotting and saving
-if ap.synapticDirection==1
+if ap.synapticNonEvokedDirection==1
     data = -data;
     clipped = -clipped;
 end
