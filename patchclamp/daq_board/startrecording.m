@@ -245,6 +245,7 @@ if DAQPARS.duration <= 2000     % user timer and startForeground for short sweep
         'BusyMode','queue','TasksToExecute',nTotalSteps,'Tag','niTimer');
     start(niTimer)
 else
+    warning('off','MATLAB:subscripting:noSubscriptsSpecified');
     t0 = clock;
     for backgroundCounter = 1:nTotalSteps
         stop(daqObj); flush(daqObj);
@@ -285,7 +286,7 @@ else
         for jCount = 1:numel(DAQPARS.inputChannels)
             input1(:,jCount) = get(plotHandle(jCount),'YData');
         end
-        savedata(input1,recordingCounter)
+        inputData(:,recordingCounter,:) = input1;
         try
             if DAQPARS.posthoc == true
                 posthocanalysis(input1,recordingMode);
@@ -316,18 +317,24 @@ else
         while (daqObj.NumScansAvailable>0), drawnow limitrate; end
         if ~isempty(progressDialog)
             progressDialog.Value = recordingCounter / nTotalSteps;
-            progressDialog.Message = ['Completed ',num2str(recordingCounter),' of ',num2str(nTotalSteps)];
-            
+            progressDialog.Message = ['Completed ',num2str(recordingCounter),' of ',num2str(nTotalSteps)];       
         end
         recordingCounter = recordingCounter + 1;
     end
+    Pars = rmfield(DAQPARS,'MainApp');
+    Pars.orderOfSteps = Pars.orderOfSteps(1:backgroundCounter);
+    descriptor = DAQPARS.MainApp.descriptorEditField.Value;
+    if isempty(descriptor)
+        fName = [DAQPARS.fileName,'.mat'];
+    else
+        fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
+    end
+    inputData = squeeze(inputData(:,1:backgroundCounter,:)); %#ok<*NODEF>
+    DAQPARS.orderOfSteps = DAQPARS.orderOfSteps(1:backgroundCounter);
+    save([DAQPARS.saveDirectory,fName],...
+        'outputData','inputData','Pars') 
     stop(daqObj)
     delete(daqObj)
-    if stopBackground
-        if backgroundCounter < nTotalSteps
-            removeextradata(backgroundCounter);
-        end
-    end
     if ishandle(progressFigure)
         close(progressDialog);
         close(progressFigure);
@@ -348,6 +355,7 @@ else
     end
     set(DAQPARS.MainApp.startButton,'Text','start')
     app.Recording = false;
+    warning('on')
 end
 
 stopBackground = [];
