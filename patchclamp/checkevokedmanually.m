@@ -1,4 +1,4 @@
-function out = checkevokedmanually(inputs,dt,MainApp)
+function out = checkevokedmanually(analysisType,inputs,dt,MainApp,ap)
 global acceptIdx
 
 data = [];
@@ -11,7 +11,13 @@ for jj = 1:numel(inputs)
     
 end
 
-app = manualcheck(data,dt,MainApp);
+if strcmp(analysisType,'evoked')
+    stimTime = ap.stimulusTime1;
+else
+    stimTime = [ap.stimulusTime1, ap.stimulusTime2];
+end
+
+app = manualcheck(data,dt,MainApp,stimTime,ap);
 waitfor(app)
 out = logical(acceptIdx);
 
