@@ -1,32 +1,43 @@
 global DAQPARS
 app = DAQPARS.MainApp;
 
-loadparametes('myparametersA')
+% loadparameters('myparametersA')
+% pushWriteMulticlampButton(app)
 loadoutputs('myoutputsA')
 pushStartButton(app)
 
 
-buttonName = questdlg('Keep recording?','Experiment ongoing','Yes', 'No', 'Yes');
-switch buttonName
-    case 'Yes'
-       % keep going
-    case 'No'
-       return
+while app.Recording
+    drawnow limitrate
 end
 
-loadparametes('myparametersB')
+% buttonName = questdlg('Keep recording?','Experiment ongoing','Yes', 'No', 'Yes');
+% switch buttonName
+%     case 'Yes'
+%        % keep going
+%     case 'No'
+%        return
+% end
+
+% loadparameters('myparametersB')
+% pushWriteMulticlampButton(app)
 loadoutputs('myoutputsB')
 pushStartButton(app)
 
 
-buttonName = questdlg('Keep recording?','Experiment ongoing','Yes', 'No', 'Yes');
-switch buttonName
-    case 'Yes'
-       % keep going
-    case 'No'
-       return
+while app.Recording
+    drawnow limitrate
 end
 
-loadparametes('myparametersC')
+% buttonName = questdlg('Keep recording?','Experiment ongoing','Yes', 'No', 'Yes');
+% switch buttonName
+%     case 'Yes'
+%        % keep going
+%     case 'No'
+%        return
+% end
+
+% loadparameters('myparametersC')
+% pushWriteMulticlampButton(app)
 loadoutputs('myoutputsC')
 pushStartButton(app)
