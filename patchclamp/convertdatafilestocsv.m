@@ -1,5 +1,6 @@
 function [] = convertdatafilestocsv(fileName,folderName)
 
+
 load(fileName,'Pars','inputData','outputData')
 
 if nargin<2
