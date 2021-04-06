@@ -19,6 +19,8 @@ if strcmp(DAQPARS.MainApp.popupSwitch_1.Value,'On') && ~isempty(find(ax1==1, 1))
         app = foo.RunningAppInstance;
         setScales(app,1);
     end
+    app.experimentEditField.Value = num2str(DAQPARS.experimentNo,'%03i');
+    app.trialEditField.Value = num2str(DAQPARS.trialNo,'%03i');
     ax(1) = app.UIAxes;
     popup = true;
 end
@@ -38,6 +40,8 @@ if strcmp(DAQPARS.MainApp.popupSwitch_2.Value,'On') && ~isempty(find(ax1==2, 1))
         app = foo.RunningAppInstance;
         setScales(app,1);
     end
+    app.experimentEditField.Value = num2str(DAQPARS.experimentNo,'%03i');
+    app.trialEditField.Value = num2str(DAQPARS.trialNo,'%03i');
     ax(2) = app.UIAxes;
     popup = true;
 end
