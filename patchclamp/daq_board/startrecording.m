@@ -331,10 +331,9 @@ else
     end
     inputData = squeeze(inputData(:,1:backgroundCounter,:)); %#ok<*NODEF>
     DAQPARS.orderOfSteps = DAQPARS.orderOfSteps(1:backgroundCounter);
+    daqreset
     save([DAQPARS.saveDirectory,fName],...
-        'outputData','inputData','Pars') 
-    stop(daqObj)
-    delete(daqObj)
+        'outputData','inputData','Pars','-nocompression')
     if ishandle(progressFigure)
         close(progressDialog);
         close(progressFigure);
