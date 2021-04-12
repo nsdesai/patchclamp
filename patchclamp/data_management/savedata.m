@@ -19,4 +19,4 @@ else
     fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
 end
 save([DAQPARS.saveDirectory,fName],...
-    'outputData','inputData','Pars')
+    'outputData','inputData','Pars','-nocompression')
