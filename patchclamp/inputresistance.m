@@ -14,6 +14,10 @@ end
 deflection(end+1) = 0;
 currents(end+1) = 0;
 
+idx = currents<-60;
+currents(idx) = [];
+deflection(idx) = [];
+
 p = polyfit(currents,deflection,1);
 
 Rn = p(1)*1000; % megaohms
