@@ -7,7 +7,7 @@ Data acquisition software for patch clamp neurophysiology
 
 REQUIREMENTS
 
-Software:     Matlab (2019a or later) and Matlab's Data Acquisition Toolbox (version 4.1 or later) 
+Software:     Matlab (2021a or later) and Matlab's Data Acquisition Toolbox (version 4.1 or later) 
 
 Hardware:     (1) National Instruments board or another data acquisition board supported by Matlab's Data Acquisition Toolbox. (2) Patch clamp amplifier(s). This software was written for Multiclamp 700A and 700B amplifiers, but other amplifiers will work (but without computer control).
 
