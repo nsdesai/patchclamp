@@ -150,7 +150,7 @@ start(testObj,"RepeatOutput")
             dataTemp = plotHandle(kk).YData;
             fStr = ['channel',num2str(idx(kk)),'REditField'];
             deflection = mean(dataTemp(pulseStart+25:pulseStart+50)) - mean(dataTemp(25:50));
-            R = round(abs(1000*amplitude/deflection)); % MOhms
+            R = abs(1000*amplitude/deflection); % MOhms
             app.(fStr).Value = R;
         end
     end
