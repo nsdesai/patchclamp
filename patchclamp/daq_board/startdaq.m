@@ -32,6 +32,7 @@ plotoutputs(recordingCounter)
 progressSoFar = recordingCounter / obj.TasksToExecute;
 if ~isempty(progressDialog)
     progressDialog.Value = progressSoFar;
+    progressDialog.Message = ['Completed ',num2str(recordingCounter),' of ',num2str(obj.TasksToExecute)];
 end
 recordingCounter = recordingCounter + 1;
 try
