@@ -19,5 +19,6 @@ end
 load([DAQPARS.saveDirectory,fName]) %#ok<LOAD>
 inputData = squeeze(inputData(:,1:tasksExecuted,:)); %#ok<*NODEF>
 DAQPARS.orderOfSteps = DAQPARS.orderOfSteps(1:tasksExecuted);
+Pars.orderOfSteps = DAQPARS.orderOfSteps;
 save([DAQPARS.saveDirectory,fName],...
     'outputData','inputData','Pars') %#ok<*USENS>
