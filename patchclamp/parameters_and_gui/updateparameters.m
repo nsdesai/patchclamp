@@ -1,4 +1,4 @@
-function [] = updateparameters(MainApp)
+function [] = updateparameters(MainApp,results)
 % function [] = updateparameters(MainApp)
 %
 % Updates the recording parameters contained in DAQPARS -- including things
@@ -38,4 +38,8 @@ DAQPARS.sampleRate = sampleRate;
 DAQPARS.channelStatus = status;
 DAQPARS.channelGain = gain;
 DAQPARS.channelHolding = holding;
+
+if nargin>1
+    DAQPARS.amplifierState = results;
+end
 
