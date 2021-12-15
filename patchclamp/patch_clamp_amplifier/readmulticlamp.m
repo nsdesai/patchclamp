@@ -13,6 +13,8 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
 
     if app.(s).Enable==false
         continue
+    else
+        results{ii} = []; %#ok<AGROW> 
     end
     
     idx = DAQPARS.amplifierIdx(ii);
@@ -59,7 +61,7 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
         holding = 0;
     end
     app.(h).Value = holding;
-    
+    results{ii} = result; %#ok<AGROW> 
     waitbar(ii*0.2+0.2,hWait,'Please wait as we read amplifiers ...');
     
 end
@@ -67,4 +69,4 @@ end
 close(hWait)
 MulticlampTelegraph('stop')
 
-updateparameters(app)
+updateparameters(app,results)
