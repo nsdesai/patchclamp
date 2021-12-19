@@ -1,9 +1,9 @@
-function [daqBoardOkay, amplifierOkay] = checkhardware
+function [daqBoardOkay, amplifierOkay, amplifierDetected] = checkhardware
 % function [daqBoardOkay, amplifierOkay] = checkhardware
 %
 % OUTPUTS
-% daqBoardOkay:     true or false   (IO board)
-% amplifierOkay:    true or false   (patch clamp amplifier)    
+% daqBoardOkay:         true or false   (IO board)
+% amplifierOkay:        true or false   (patch clamp amplifier)    
 
 global DAQPARS
 
