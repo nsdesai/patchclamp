@@ -1,4 +1,4 @@
-function [amplifierOkay] = checkamplifier(amplifierInfo,amplifierIdx)
+function [amplifierOkay,amplifierDetected] = checkamplifier(amplifierInfo,amplifierIdx)
 % function [amplifierOkay] = checkamplifier(amplifierInfo,amplifierIdx)
 %
 % Checks that the Multiclamp amplifiers specified by the 
@@ -23,7 +23,6 @@ detectedIDs = MulticlampTelegraph('getAllElectrodeIDS');
 MulticlampTelegraph('stop')
 
 nChannels = numel(amplifierIdx);
-
 
 for ii = 1:nChannels
     
@@ -58,6 +57,4 @@ for ii = 1:nChannels
     
 end
 
-        
-    
     
