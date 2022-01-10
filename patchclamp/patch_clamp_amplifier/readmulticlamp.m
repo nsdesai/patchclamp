@@ -1,30 +1,20 @@
-function [] = readmulticlamp(app,selectedAmp)
+function [] = readmulticlamp(app)
 global DAQPARS
 
 cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug\MulticlampControl.exe '];
 MulticlampTelegraph('start')
 hWait = waitbar(0.2,'Please wait as we read amplifiers ...');
 
-if nargin>1
-    ampIdx = false(numel(DAQPARS.amplifierIdx),1);
-    ampIdx(selectedAmp) = true;
-else
-    ampIdx = true(numel(DAQPARS.amplifierIdx),1);
-end
-
 for ii = 1:numel(DAQPARS.amplifierIdx)
-
-    if ampIdx(ii)==false
-        continue
-    end
-
+    
     s = ['statusDropDown_',num2str(ii)];
     g = ['gainDropDown_',num2str(ii)];
     h = ['holdingEditField_',num2str(ii)];
 
-    results{ii} = []; %#ok<AGROW> 
     if app.(s).Enable==false
         continue
+    else
+        results{ii} = []; %#ok<AGROW> 
     end
     
     idx = DAQPARS.amplifierIdx(ii);

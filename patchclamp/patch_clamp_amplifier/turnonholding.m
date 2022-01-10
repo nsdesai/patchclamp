@@ -3,6 +3,11 @@ global DAQPARS
 
 testPulseOn = app.TestPulse;
 
+if strcmp(DAQPARS.channelStatus(channelNum),'current clamp')
+    disp('adding holding potential only works for voltage clamp')
+    return
+end
+
 if testPulseOn==true  % turn off test pulse momentarily
    pushTestButton(app);
 end

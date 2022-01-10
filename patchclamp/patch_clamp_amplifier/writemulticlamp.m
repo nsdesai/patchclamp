@@ -1,4 +1,4 @@
-function [] = writemulticlamp(~)
+function [] = writemulticlamp(app)
 global DAQPARS
 
 cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug\MulticlampControl.exe '];
@@ -18,7 +18,7 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
     % number of 700B (in demo mode, the latter is "Demo")
     name = DAQPARS.amplifierInfo(idx).name;
     % model = '0' means 700A, model = '1' means 700B
-    if strcmp(name(6),'B'), model = '1'; else model = '0'; end %#ok<SEPEX> 
+    if strcmp(name(6),'B'), model = '1'; else model = '0'; end
     if strcmp(model,'0')
         amplifierID = name(15);
     else
@@ -32,21 +32,18 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
             cmd = [cmdPreamble, model,' ', amplifierID,' ',...
                 channelID,' 3 ',num2str(gain(ii)),' ', ...
                 num2str(holding(ii))];
-            channelMode = '0';
-
+            
         case 'current clamp'
             
             cmd = [cmdPreamble, model,' ', amplifierID,' ',...
                 channelID,' 2 ',num2str(gain(ii)),...
                 ' 10000 10000 ',num2str(holding(ii))];
-            channelMode = '1';
-
+            
         case 'I=0'
             
             cmd = [cmdPreamble, model,' ',amplifierID,' ',...
                 channelID,' 6 ',num2str(gain(ii))];
-            channelMode = '2';
-
+            
         otherwise
             
             continue
@@ -57,16 +54,6 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
     
     waitbar(ii*0.2+0.2,hWait,'Please wait as we update amplifiers ...');
     
-    DAQPARS.amplifierState{ii}{2} = channelMode;
-    DAQPARS.amplifierState{ii}{3} = num2str(gain(ii));
-    if strcmp(channelMode,'0')
-        DAQPARS.amplifierState{ii}{5} = num2str(holding(ii)*1E-3);
-    elseif strcmp(channelMode,'1')
-        DAQPARS.amplifierState{ii}{5} = num2str(holding(ii)*1E-12);
-    else
-        DAQPARS.amplifierState{ii}{5} = 0;
-    end
-
 end
 
 close(hWait)
