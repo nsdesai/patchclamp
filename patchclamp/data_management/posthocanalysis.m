@@ -32,13 +32,15 @@ if app.checkButton.Value
             analysisData(ii,analysisCounter,2) = ...
                 mean(input2(first-round(10/dt):first)); % holding current or resting potential
             if recordingMode(ii)==1 % voltage clamp
-                deflectionI = abs(mean(input2(second-round(5/dt):second)));
-                deflectionV = DAQPARS.stability.deflectionOutput(ii);
-                peakI = max(abs(input2));
+                baseline = abs(mean(input2(1:round(5/dt))));
+                deflectionI = abs(mean(input2(second-round(5/dt):second))) - baseline;
+                deflectionV = 1000*DAQPARS.stability.deflectionOutput(ii);
+                peakI = max(abs(input2))-baseline;
                 analysisData(ii,analysisCounter,3) = deflectionV/peakI;
             elseif recordingMode(ii)==2 % current clamp
-                deflectionV = abs(mean(input2(second-round(5/dt):second)));
-                deflectionI = DAQPARS.stability.deflectionOutput(ii);
+                baseline = abs(mean(input2(1:round(5/dt))));
+                deflectionV = abs(mean(input2(second-round(5/dt):second)))-baseline;
+                deflectionI = 0.001*DAQPARS.stability.deflectionOutput(ii);
             end
             analysisData(ii,analysisCounter,1) = ...
                 deflectionV/deflectionI - analysisData(ii,analysisCounter,3); % R_N    
