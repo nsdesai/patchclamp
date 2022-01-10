@@ -33,11 +33,9 @@ if (nargin==0)                          % initialize
     daqreset                            % delete any active daq objects
     
     
-    if isfield(DAQPARS,'MainApp')
-        disp('LCSMS_patch_clamp is already open.')
-        return
+    if ~isfield(DAQPARS,'MainApp')
+       opendaqfigure                       % open GUI with default parameters
     end
-    opendaqfigure                       % open GUI with default parameters
  
     
     [daqBoardOkay, amplifierOkay] = ... % check that IO board is working
