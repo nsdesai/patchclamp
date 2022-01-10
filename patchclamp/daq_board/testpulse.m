@@ -15,7 +15,7 @@ function [] = testpulse(app)
 %
 % Niraj S. Desai (NSD), 09/01/2020.
 
-global DAQPARS testObj
+global DAQPARS testObj %#ok<GVMIS> 
 
 % if the test pulse is going and the user wants to stop it, they press the
 % "test" button a second time. This sets app.TestPulse to false and
@@ -60,6 +60,7 @@ end
 % get the gains for this condition
 outputGains = ones(1,numel(testChannels));
 inputGains = outputGains;
+testChannelsType = zeros(numel(testChannels),1);
 for ii = 1:numel(testChannels)
     if testChannels(ii)
         ampInfoChannel = ampInfo(ii);
@@ -70,6 +71,11 @@ for ii = 1:numel(testChannels)
                 outputGains(ii) = ampInfoChannel.outputScalingVoltageClamp;
                 inputGains(ii) = ...
                     channelGain/ampInfoChannel.inputScalingVoltageClamp;
+            case 'current clamp'
+                outputGains(ii) = ampInfoChannel.outputScalingCurrentClamp;
+                inputGains(ii) = ...
+                    channelGain/ampInfoChannel.inputScalingCurrentClamp;
+                testChannelsType(ii) = 1;
             otherwise
                 warndlg('All test channels must be in voltage clamp','Check parameters')
                 app.testButton.Text = 'test';
@@ -105,7 +111,8 @@ addoutput(testObj,DAQPARS.daqBoardInfo.ID,aoChannels,"Voltage");
 dataTemp = readwrite(testObj,outputs,"OutputFormat","Matrix"); % used to set y-axis scale
 dataTemp = dataTemp ./ repmat(inputGains(channelIdx),length(dataTemp),1);
 testObj.ScansAvailableFcnCount = N;
-testObj.ScansAvailableFcn = @(src,evt) plottestdata(src,app,channelIdx,pulseStart,amplitude,inputGains);
+testChannelsType = testChannelsType(channelIdx);
+testObj.ScansAvailableFcn = @(src,evt) plottestdata(src,app,channelIdx,testChannelsType,pulseEnd,amplitude,inputGains);
 
 % figure out where to plot the recordings
 app.UIPlottingChannels.Data = false(2,8);
@@ -143,14 +150,18 @@ preload(testObj,outputs)
 start(testObj,"RepeatOutput")
 
 % function that reads the data and plots it
-    function [] = plottestdata(obj,app,idx,pulseStart,amplitude,inputGains)
+    function [] = plottestdata(obj,app,idx,testChannelsType,pulseEnd,amplitude,inputGains)
         data = read(obj,obj.ScansAvailableFcnCount,"OutputFormat","Matrix");
         for kk = 1:size(data,2)
             plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
             dataTemp = plotHandle(kk).YData;
             fStr = ['channel',num2str(idx(kk)),'REditField'];
-            deflection = mean(dataTemp(pulseStart+25:pulseStart+50)) - mean(dataTemp(25:50));
-            R = abs(1000*amplitude/deflection); % MOhms
+            deflection = mean(dataTemp(pulseEnd-35:pulseEnd-5)) - mean(dataTemp(25:50));
+            if testChannelsType(kk)==0  % voltage clamp
+                R = abs(1000*amplitude/deflection); % MOhms
+            else % current clamp
+                R = abs(1000*deflection/amplitude);
+            end
             app.(fStr).Value = R;
         end
     end
