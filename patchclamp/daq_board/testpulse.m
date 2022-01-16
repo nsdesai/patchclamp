@@ -14,6 +14,8 @@ function [] = testpulse(app)
 % app:      handle to the main acquisition app
 %
 % Niraj S. Desai (NSD), 09/01/2020.
+% 
+% Last modified: NSD, 01/16/22
 
 global DAQPARS testObj %#ok<GVMIS> 
 
@@ -28,6 +30,8 @@ if ~app.TestPulse
     outputs = zeros(1,numel(aoChannels));
     write(testObj,outputs)
     daqreset
+    app.UIInputAxes2.YLabel.String = 'mV or pA';
+    app.UIInputAxes2.XLabel.String = 'time (msec)';
     return
 end
 
@@ -116,35 +120,29 @@ testObj.ScansAvailableFcn = @(src,evt) plottestdata(src,app,channelIdx,testChann
 
 % figure out where to plot the recordings
 app.UIPlottingChannels.Data = false(2,8);
-if numel(channelIdx)== 1
-    app.UIPlottingChannels.Data(1,channelIdx) = true;
-elseif numel(channelIdx) == 2
-    app.UIPlottingChannels.Data(1,channelIdx(1)) = true;
-    app.UIPlottingChannels.Data(2,channelIdx(2)) = true;
-elseif numel(channelIdx) == 3
-    app.UIPlottingChannels.Data(1,channelIdx(1:2)) = true;
-    app.UIPlottingChannels.Data(2,channelIdx(3)) = true;
-else
-    app.UIPlottingChannels.Data(1,channelIdx(1:2)) = true;
-    app.UIPlottingChannels.Data(2,channelIdx(3:4)) = true;
-end
+app.UIPlottingChannels.Data(1,channelIdx) = true;
 [xPlot,~] = find(app.UIPlottingChannels.Data);
 
 % get the graphs ready
 cla(app.UIInputAxes1); cla(app.UIInputAxes2);
 load('plottingColors.mat','colors')  % this is in the parameters_and_gui folder
+rTime = minScansAvailable*dt/1000; % seconds between resistance measurements
 for jj = 1:numel(channelIdx)
     ax = ['UIInputAxes',num2str(xPlot(jj))];
     ax = app.(ax);
     color = colors(channelIdx(jj),:);
-    plotHandle(jj) = plot(ax,(1:N)*dt,dataTemp(1:N,jj),'color',color); %#ok<AGROW>
+    plotHandle(jj) = line(ax,(1:N)*dt,dataTemp(1:N,jj),'color',color); %#ok<AGROW>
+    ax2 = app.UIInputAxes2;
+    rHandle(jj) = plot(ax2,(1:100)*rTime,NaN(100,1),'.','color',color); %#ok<AGROW> 
+    rIdx = 1;
 end
 xlim(app.UIInputAxes1,[0 N*dt])
-xlim(app.UIInputAxes2,[0 N*dt])
 yLimit = min(5000, 1.25*max(abs(dataTemp(:))));
 ylim(app.UIInputAxes1,[-yLimit yLimit])
-ylim(app.UIInputAxes2,[-yLimit yLimit])
-
+xlim(app.UIInputAxes2,[0 round(rTime*100)])
+app.UIInputAxes2.YLabel.String = 'M\Omega';
+app.UIInputAxes2.XLabel.String = 'time (s)';
+tic
 % preload output data and start DAQ object
 preload(testObj,outputs)
 start(testObj,"RepeatOutput")
@@ -154,16 +152,19 @@ start(testObj,"RepeatOutput")
         data = read(obj,obj.ScansAvailableFcnCount,"OutputFormat","Matrix");
         for kk = 1:size(data,2)
             plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
-            dataTemp = plotHandle(kk).YData;
-            fStr = ['channel',num2str(idx(kk)),'REditField'];
-            deflection = mean(dataTemp(pulseEnd-35:pulseEnd-5)) - mean(dataTemp(25:50));
+            dataTemp1 = plotHandle(kk).YData;
+            kStr = ['channel',num2str(idx(kk)),'REditField'];
+            deflection = mean(dataTemp1(pulseEnd-35:pulseEnd-5)) - mean(dataTemp1(25:50));
             if testChannelsType(kk)==0  % voltage clamp
                 R = abs(1000*amplitude/deflection); % MOhms
             else % current clamp
                 R = abs(1000*deflection/amplitude);
             end
-            app.(fStr).Value = R;
+            app.(kStr).Value = R;
+            rHandle(kk).YData(rIdx) = R;
         end
+        rIdx = max(rem(rIdx+1,100),1);
+        if rIdx==1, toc, end
     end
 
 end
