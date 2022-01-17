@@ -142,7 +142,7 @@ ylim(app.UIInputAxes1,[-yLimit yLimit])
 xlim(app.UIInputAxes2,[0 round(rTime*100)])
 app.UIInputAxes2.YLabel.String = 'M\Omega';
 app.UIInputAxes2.XLabel.String = 'time (s)';
-tic
+
 % preload output data and start DAQ object
 preload(testObj,outputs)
 start(testObj,"RepeatOutput")
@@ -164,7 +164,6 @@ start(testObj,"RepeatOutput")
             rHandle(kk).YData(rIdx) = R;
         end
         rIdx = max(rem(rIdx+1,100),1);
-        if rIdx==1, toc, end
     end
 
 end
