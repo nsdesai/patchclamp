@@ -19,6 +19,7 @@ function [] = testpulse(app)
 
 global DAQPARS testObj %#ok<GVMIS> 
 
+warning off
 
 % if the test pulse is going and the user wants to stop it, they press the
 % "test" button a second time. This sets app.TestPulse to false and
@@ -33,6 +34,8 @@ if ~app.TestPulse
     daqreset
     app.UIInputAxes2.YLabel.String = 'mV or pA';
     app.UIInputAxes2.XLabel.String = 'time (msec)';
+    clc
+    warning on
     return
 end
 
@@ -142,7 +145,7 @@ xlim(app.UIInputAxes1,[0 N*dt])
 yLimit = min(5000, 1.25*max(abs(dataTemp(:))));
 ylim(app.UIInputAxes1,[-yLimit yLimit])
 xlim(app.UIInputAxes2,[0 round(rTime*yPts)])
-% ylim(app.UIInputAxes2,[2 10])
+ylim('auto')
 app.UIInputAxes2.YLabel.String = 'M\Omega';
 app.UIInputAxes2.XLabel.String = 'time (s)';
 
@@ -176,11 +179,9 @@ start(testObj,"RepeatOutput")
                 rValues(kk*yPts) = rValues(kk*yPts-1);
             end
             if any(isnan(rValues)), return, end
-            yMax = mean(rValues) + 2*std(rValues);
-            yMin = mean(rValues) - 2*std(rValues);
-            ylim([yMin yMax])
+            yMax = mean(rValues) + 3*std(rValues);
+            yMin = mean(rValues) - 3*std(rValues);
+            ylim(app.UIInputAxes2,[yMin yMax])
         end
     end
 end
-
-
