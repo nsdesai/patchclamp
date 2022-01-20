@@ -15,9 +15,10 @@ function [] = testpulse(app)
 %
 % Niraj S. Desai (NSD), 09/01/2020.
 % 
-% Last modified: NSD, 01/16/22
+% Last modified: NSD, 01/20/22
 
 global DAQPARS testObj %#ok<GVMIS> 
+
 
 % if the test pulse is going and the user wants to stop it, they press the
 % "test" button a second time. This sets app.TestPulse to false and
@@ -127,25 +128,29 @@ app.UIPlottingChannels.Data(1,channelIdx) = true;
 cla(app.UIInputAxes1); cla(app.UIInputAxes2);
 load('plottingColors.mat','colors')  % this is in the parameters_and_gui folder
 rTime = minScansAvailable*dt/1000; % seconds between resistance measurements
+yPts = 100; % number of resistance measurements to plot at one time
 for jj = 1:numel(channelIdx)
     ax = ['UIInputAxes',num2str(xPlot(jj))];
     ax = app.(ax);
     color = colors(channelIdx(jj),:);
     plotHandle(jj) = line(ax,(1:N)*dt,dataTemp(1:N,jj),'color',color); %#ok<AGROW>
     ax2 = app.UIInputAxes2;
-    rHandle(jj) = plot(ax2,(1:100)*rTime,NaN(100,1),'.','color',color); %#ok<AGROW> 
+    rHandle(jj) = plot(ax2,(1:yPts)*rTime,NaN(yPts,1),'.','color',color); %#ok<AGROW> 
     rIdx = 1;
 end
 xlim(app.UIInputAxes1,[0 N*dt])
 yLimit = min(5000, 1.25*max(abs(dataTemp(:))));
 ylim(app.UIInputAxes1,[-yLimit yLimit])
-xlim(app.UIInputAxes2,[0 round(rTime*100)])
+xlim(app.UIInputAxes2,[0 round(rTime*yPts)])
+% ylim(app.UIInputAxes2,[2 10])
 app.UIInputAxes2.YLabel.String = 'M\Omega';
 app.UIInputAxes2.XLabel.String = 'time (s)';
+
 
 % preload output data and start DAQ object
 preload(testObj,outputs)
 start(testObj,"RepeatOutput")
+
 
 % function that reads the data and plots it
     function [] = plottestdata(obj,app,idx,testChannelsType,pulseEnd,amplitude,inputGains)
@@ -161,11 +166,21 @@ start(testObj,"RepeatOutput")
                 R = abs(1000*deflection/amplitude);
             end
             app.(kStr).Value = R;
-            rHandle(kk).YData(rIdx) = R;
+            rHandle(kk).YData(rIdx) = R;            
         end
-        rIdx = max(rem(rIdx+1,100),1);
+        rIdx = max(rem(rIdx+1,yPts),1);
+        if rIdx==1
+            rValues = zeros(yPts*size(data,2),1);
+            for kk = 1:size(data,2)
+                rValues((kk-1)*yPts+1:kk*yPts) = rHandle(kk).YData;
+                rValues(kk*yPts) = rValues(kk*yPts-1);
+            end
+            if any(isnan(rValues)), return, end
+            yMax = mean(rValues) + 2*std(rValues);
+            yMin = mean(rValues) - 2*std(rValues);
+            ylim([yMin yMax])
+        end
     end
-
 end
 
 
