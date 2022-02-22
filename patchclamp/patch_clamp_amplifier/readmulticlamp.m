@@ -5,6 +5,8 @@ cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug
 MulticlampTelegraph('start')
 hWait = waitbar(0.2,'Please wait as we read amplifiers ...');
 
+DAQPARS.multiclampHolding = zeros(DAQPARS.nChannels,1);
+
 for ii = 1:numel(DAQPARS.amplifierIdx)
     
     s = ['statusDropDown_',num2str(ii)];
@@ -61,6 +63,7 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
         holding = 0;
     end
     app.(h).Value = holding;
+    DAQPARS.multiclampHolding(ii) = holding;
     results{ii} = result; %#ok<AGROW> 
     waitbar(ii*0.2+0.2,hWait,'Please wait as we read amplifiers ...');
     

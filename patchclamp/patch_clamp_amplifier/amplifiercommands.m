@@ -1,4 +1,4 @@
-function [amplifierOkay] = amplifiercommands(cmd,bridge,dc,testSignal)
+function [amplifierOkay] = amplifiercommands(channelNo, cmd,bridge,dc,testSignal)
 % function [amplifierOkay] = amplifiercommands(cmd,bridge,dc)
 %
 % This function works only for Multiclamp 700A/700B amplifiers.
@@ -16,6 +16,7 @@ function [amplifierOkay] = amplifiercommands(cmd,bridge,dc,testSignal)
 % where, again, channelNumber is usually 1.
 %
 % INPUTS
+% channelNo 1-4           number of Multiclamp channel
 % cmd:      ready         put amplifier in voltage clamp with a gain of 1 
 %                         and holding potential zero
 %           zero          zero the pipette offset
@@ -36,21 +37,13 @@ function [amplifierOkay] = amplifiercommands(cmd,bridge,dc,testSignal)
 %                      false           errors
 % result               output from MulticlampControl.cpp
 %
-% Last modified: March 2, 2017 (NSD)
+% Last modified: February 17, 2022 (NSD)
 
 
-global APPARS DAQPARS
-persistent ampInfo
+global DAQPARS
 
 % get amplifier information
-if isempty(APPARS)
-    APPARS.fixedParametersFile = matfile('fixed_parameters.mat');
-end
-if ~exist('ampInfo','var') || isempty(ampInfo)
-    p = APPARS.fixedParametersFile.DaqAutomated;
-    channelNum = p.channels.electrodeInput;
-    ampInfo = DAQPARS.amplifierInfo(DAQPARS.amplifierIdx(channelNum));
-end
+ampInfo = DAQPARS.amplifierInfo(DAQPARS.amplifierIdx(channelNo));
 
 % the necessary amplifier information is contained in its name, which will
 % be organized like this:

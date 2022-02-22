@@ -1,9 +1,9 @@
 function [] = turnonholding(app,channelNum)
-global DAQPARS
+global DAQPARS %#ok<*GVMIS> 
 
 testPulseOn = app.TestPulse;
 
-if strcmp(DAQPARS.channelStatus(channelNum),'current clamp')
+if ~strcmp(DAQPARS.channelStatus(channelNum),'voltage clamp')
     disp('adding holding potential only works for voltage clamp')
     return
 end
@@ -26,7 +26,7 @@ if idx > 4, return, end   % ignore manual settings
 % number of 700B (in demo mode, the latter is "Demo")
 name = DAQPARS.amplifierInfo(idx).name;
 % model = '0' means 700A, model = '1' means 700B
-if strcmp(name(6),'B'), model = '1'; else model = '0'; end
+if strcmp(name(6),'B'), model = '1'; else model = '0'; end %#ok<SEPEX> 
 if strcmp(model,'0')
     amplifierID = name(15);
 else

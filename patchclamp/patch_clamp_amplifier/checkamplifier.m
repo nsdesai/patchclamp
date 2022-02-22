@@ -1,4 +1,4 @@
-function [amplifierOkay,amplifierDetected] = checkamplifier(amplifierInfo,amplifierIdx)
+function [amplifierOkay] = checkamplifier(amplifierInfo,amplifierIdx)
 % function [amplifierOkay] = checkamplifier(amplifierInfo,amplifierIdx)
 %
 % Checks that the Multiclamp amplifiers specified by the 
