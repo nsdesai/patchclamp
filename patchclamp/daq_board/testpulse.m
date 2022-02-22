@@ -19,7 +19,7 @@ function [] = testpulse(app)
 
 global DAQPARS testObj %#ok<GVMIS> 
 
-warning off
+warning('off')
 
 % if the test pulse is going and the user wants to stop it, they press the
 % "test" button a second time. This sets app.TestPulse to false and
@@ -35,14 +35,7 @@ if ~app.TestPulse
     app.UIInputAxes2.YLabel.String = 'mV or pA';
     app.UIInputAxes2.XLabel.String = 'time (msec)';
     clc
-    warning on
     return
-end
-
-% clear the calculated resistance values in the GUI
-for jj = 1:4
-    fStr = ['channel',num2str(jj),'REditField'];
-    app.(fStr).Value = 0;
 end
 
 % sample rate and amplifier information; we always use 10 kHz for this
@@ -148,12 +141,12 @@ xlim(app.UIInputAxes2,[0 round(rTime*yPts)])
 ylim('auto')
 app.UIInputAxes2.YLabel.String = 'M\Omega';
 app.UIInputAxes2.XLabel.String = 'time (s)';
-
+app.UIInputAxes2.YRuler.Exponent = 0;
+ytickformat(app.UIInputAxes2,'%0.2f')
 
 % preload output data and start DAQ object
 preload(testObj,outputs)
 start(testObj,"RepeatOutput")
-
 
 % function that reads the data and plots it
     function [] = plottestdata(obj,app,idx,testChannelsType,pulseEnd,amplitude,inputGains)
@@ -161,14 +154,12 @@ start(testObj,"RepeatOutput")
         for kk = 1:size(data,2)
             plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
             dataTemp1 = plotHandle(kk).YData;
-            kStr = ['channel',num2str(idx(kk)),'REditField'];
             deflection = mean(dataTemp1(pulseEnd-35:pulseEnd-5)) - mean(dataTemp1(25:50));
             if testChannelsType(kk)==0  % voltage clamp
                 R = abs(1000*amplitude/deflection); % MOhms
             else % current clamp
                 R = abs(1000*deflection/amplitude);
             end
-            app.(kStr).Value = R;
             rHandle(kk).YData(rIdx) = R;            
         end
         rIdx = max(rem(rIdx+1,yPts),1);

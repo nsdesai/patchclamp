@@ -11,7 +11,7 @@ function [] = stopdaq(obj,event,daqObj,progressDialog,progressFigure)  %#ok<INUS
 % progressDialog:   progress dialog within progress figure
 % progressFigure:   progress figure
 
-global DAQPARS inputData stopBackground
+global DAQPARS inputData stopBackground %#ok<GVMIS> 
 
 tasksExecuted = obj.TasksExecuted;
 tasksToExecute = obj.TasksToExecute;
@@ -28,19 +28,21 @@ if ~isempty(progressFigure)
     close(progressFigure)
 end
 drawnow
-if DAQPARS.MainApp.savedataCheckBox.Value 
+if strcmp(DAQPARS.MainApp.saveDropDown.Value,'save data') 
     newexperiment('next trial')
-else % move data to temp folder and append time
+    DAQPARS.preview.tempName = [];
+else
     descriptor = DAQPARS.MainApp.descriptorEditField.Value;
     if isempty(descriptor)
         fName = [DAQPARS.fileName,'.mat'];
     else
         fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
     end
-    fName1 = [DAQPARS.saveDirectory,fName];
-    tempName = [DAQPARS.saveDirectory,'temp\',datestr(now,30),'_',fName];
-    movefile(fName1, tempName)
-end 
+    DAQPARS.preview.fName1 = [DAQPARS.saveDirectory,fName];
+    DAQPARS.preview.tempName = [DAQPARS.saveDirectory,'temp\',datestr(now,30),'_',fName];
+    movefile(DAQPARS.preview.fName1, DAQPARS.preview.tempName)
+end
+       
 stopBackground = [];
 DAQPARS.MainApp.Recording = false;
 

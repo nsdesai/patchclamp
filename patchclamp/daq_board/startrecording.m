@@ -15,7 +15,7 @@ function [] = startrecording
 %
 
 
-global DAQPARS outputData inputData
+global DAQPARS outputData inputData %#ok<*GVMIS> 
 global plottingCounter stopBackground recordingCounter
 
 app = DAQPARS.MainApp;
@@ -44,6 +44,44 @@ if isempty(DAQPARS.inputChannels)
     warndlg('At least one input channel must be active',...
         'Choose an input channel')
     return
+end
+multiclampSyncRequired = false;
+MulticlampTelegraph('start')
+for kk = 1:numel(DAQPARS.inputChannels)
+    channelNo = DAQPARS.inputChannels(kk);
+    if ~strcmp(DAQPARS.amplifierInfo(channelNo).name(1:2),'MC')
+        continue
+    end
+    if DAQPARS.channelHolding(channelNo) ~= DAQPARS.multiclampHolding(channelNo)
+        multiclampSyncRequired = true;
+        continue
+    end
+    ID = DAQPARS.amplifierInfo(channelNo).ID;
+    chan = MulticlampTelegraph('getElectrodeState',ID);
+    switch chan.OperatingMode
+        case 'V-Clamp'
+            if ~strcmp(DAQPARS.channelStatus{channelNo},'voltage clamp')
+                multiclampSyncRequired = true;
+            end
+        case 'I-Clamp'
+            if ~strcmp(DAQPARS.channelStatus{channelNo},'current clamp')
+                multiclampSyncRequired = true;
+            end
+        case 'I = 0'
+            if ~strcmp(DAQPARS.channelStatus{channelNo},'I=0')
+                multiclampSyncRequired = true;
+            end
+        otherwise
+            % nothing
+    end
+    if chan.Alpha ~= DAQPARS.channelGain(channelNo)
+        multiclampSyncRequired = true;
+    end
+end
+MulticlampTelegraph('stop')
+DAQPARS.multiclampSyncRequired = multiclampSyncRequired;
+if DAQPARS.multiclampSyncRequired
+    pushWriteMulticlampButton(app)
 end
 
 
@@ -126,11 +164,22 @@ for iCount = 1:numel(DAQPARS.inputChannels)
     end
 end
 [ax,popup] = chooseaxes(ax1);
+if ~popup
+    axis(ax(1),'auto')
+    axis(ax(2),'auto')
+end
+
+% check if user has requested a gap-free loop of the first output
+if strcmp(app.episodicDropDown.Value,'episodic')
+    loopRequested = false;
+else
+    loopRequested = true;
+end
 
 
 % get ready to go
 set(app.startButton,'Text','stop')
-if DAQPARS.repetitions > 1
+if (DAQPARS.repetitions>1) && ~loopRequested
     progressFigure = uifigure;
     progressFigure.Position = [150 50 400 120];
     progressFigure.Name = 'PROGRESS';
@@ -224,137 +273,188 @@ end
 recordingCounter = 1;
 DAQPARS.time = now;
 DAQPARS.triggerTime = [];
-if DAQPARS.duration <= 2000     % user timer and startForeground for short sweeps
-    cla(ax(1)); cla(ax(2));
-    hold(ax(1),'on'); hold(ax(2),'on')
-    for iCount = 1:numel(DAQPARS.inputChannels)
-        plotHandle(iCount) = plot(ax(ax1(iCount)), ...
-            dt:dt:DAQPARS.duration,...
-            NaN(length(outputData),1),...
-            'color',colors(DAQPARS.inputChannels(iCount),:)); %#ok<*SAGROW,*NASGU>
+if loopRequested
+    progressFigure = [];
+    output1 = squeeze(outputData(:,1,:)) ./ repmat(outputGains,size(outputData,1),1);
+    [tempFile,fileName,triggerTime] = looprecording(ax,ax1,daqObj,output1,inputGains,colors,popup);
+    fclose(tempFile);
+    descriptor = app.descriptorEditField.Value;
+    if isempty(descriptor)
+        fName = [DAQPARS.fileName,'.mat'];
+    else
+        fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
     end
-    hold(ax(1),'off'); hold(ax(2),'off')
-    if ~popup
-        xlim(ax(1),[0 DAQPARS.duration]);
-        xlim(ax(2),[0 DAQPARS.duration]);
+    DAQPARS.preview.fName1 = [DAQPARS.saveDirectory,fName];
+    % convert bin to MAT
+    % DAQPARS.preview.tempName = new MAT file (including outputData and
+    % Pars)
+    fid = fopen(fileName);
+    inputData = fread(fid,"double");
+    fclose(fid);
+    N = ceil(length(inputData)/length(output1));
+    outputData = repmat(outputData(:,1,:),N,1);
+    outputData = outputData(1:length(inputData),:);
+    Pars = rmfield(DAQPARS,'MainApp');
+    Pars.orderOfSteps = 1;
+    Pars.repetitions = 1;
+    Pars.triggerTime = triggerTime;
+    if strcmp(app.saveDropDown.Value,'save data')
+        newexperiment('next trial')
+        save(DAQPARS.preview.fName1,'Pars','outputData','inputData')
+        DAQPARS.preview.tempName = [];
+    else
+        foo = fileName(1:end-3);
+        foo = [foo,'mat'];
+        DAQPARS.preview.tempName = foo;
+        save(DAQPARS.preview.tempName,'Pars','outputData','inputData')
     end
-    niTimer = timer('TimerFcn',...
-        {@startdaq,daqObj,inputGains,outputGains,progressDialog,plotHandle,recordingMode},...
-        'StopFcn',{@stopdaq,daqObj,progressDialog,progressFigure},...
-        'Period',DAQPARS.period/1000,'ExecutionMode','fixedRate',...
-        'BusyMode','queue','TasksToExecute',nTotalSteps,'Tag','niTimer');
-    start(niTimer)
 else
-    warning('off','MATLAB:subscripting:noSubscriptsSpecified');
-    t0 = clock;
-    for backgroundCounter = 1:nTotalSteps
-        stop(daqObj); flush(daqObj);
+
+    if DAQPARS.duration <= 2000     % user timer and startForeground for short sweeps
         cla(ax(1)); cla(ax(2));
         hold(ax(1),'on'); hold(ax(2),'on')
         for iCount = 1:numel(DAQPARS.inputChannels)
             plotHandle(iCount) = plot(ax(ax1(iCount)), ...
                 dt:dt:DAQPARS.duration,...
                 NaN(length(outputData),1),...
-                'color',colors(DAQPARS.inputChannels(iCount),:));
+                'color',colors(DAQPARS.inputChannels(iCount),:)); %#ok<*SAGROW,*NASGU>
         end
         hold(ax(1),'off'); hold(ax(2),'off')
         if ~popup
             xlim(ax(1),[0 DAQPARS.duration]);
             xlim(ax(2),[0 DAQPARS.duration]);
-            axis 'auto y'
         end
-        output1 = squeeze(outputData(:,DAQPARS.orderOfSteps(recordingCounter),:)) ...
-            ./ repmat(outputGains,size(outputData,1),1);
-        preload(daqObj, output1);
-        N = ceil(DAQPARS.sampleRate/10); % minimum number to trigger ScansAvailableFcn
-        daqObj.ScansAvailableFcnCount = N;
-        daqObj.ScansAvailableFcn = @(src,evt) plotinputs(src,evt,inputGains,plotHandle);
-        plotoutputs(recordingCounter)
-        plottingCounter = 1;
-        triggerTime = now;
-        start(daqObj)
-        nTotalScans = length(output1);
-        while daqObj.NumScansAcquired<nTotalScans
-            if stopBackground
-                break
+        niTimer = timer('TimerFcn',...
+            {@startdaq,daqObj,inputGains,outputGains,progressDialog,plotHandle,recordingMode},...
+            'StopFcn',{@stopdaq,daqObj,progressDialog,progressFigure},...
+            'Period',DAQPARS.period/1000,'ExecutionMode','fixedRate',...
+            'BusyMode','queue','TasksToExecute',nTotalSteps,'Tag','niTimer');
+        start(niTimer)
+    else
+        warning('off','MATLAB:subscripting:noSubscriptsSpecified');
+        t0 = clock;
+        for backgroundCounter = 1:nTotalSteps
+            stop(daqObj); flush(daqObj);
+            cla(ax(1)); cla(ax(2));
+            hold(ax(1),'on'); hold(ax(2),'on')
+            for iCount = 1:numel(DAQPARS.inputChannels)
+                plotHandle(iCount) = plot(ax(ax1(iCount)), ...
+                    dt:dt:DAQPARS.duration,...
+                    NaN(length(outputData),1),...
+                    'color',colors(DAQPARS.inputChannels(iCount),:));
             end
-            drawnow limitrate
-        end
-        DAQPARS.triggerTime(backgroundCounter) = triggerTime;
-        pause(0.2) % give plotinputs time to finish
-        input1 = zeros(size(output1,1),numel(DAQPARS.inputChannels));
-        for jCount = 1:numel(DAQPARS.inputChannels)
-            input1(:,jCount) = get(plotHandle(jCount),'YData');
-        end
-        inputData(:,recordingCounter,:) = input1;
-        try
-            if DAQPARS.posthoc == true
-                posthocanalysis(input1,recordingMode);
+            hold(ax(1),'off'); hold(ax(2),'off')
+            if ~popup
+                xlim(ax(1),[0 DAQPARS.duration]);
+                xlim(ax(2),[0 DAQPARS.duration]);
+                axis 'auto y'
             end
-        catch ME
-            DAQPARS.stability.ME = ME;
-        end
-        if backgroundCounter < nTotalSteps
-            while etime(clock,t0)<(DAQPARS.period/1000)
-                if stopBackground
-                    break %#ok<*UNRCH>
-                end
-                drawnow limitrate
-            end
-            t0 = clock;
-        else
-            while daqObj.Running
+            output1 = squeeze(outputData(:,DAQPARS.orderOfSteps(recordingCounter),:)) ...
+                ./ repmat(outputGains,size(outputData,1),1);
+            preload(daqObj, output1);
+            N = ceil(DAQPARS.sampleRate/10); % minimum number to trigger ScansAvailableFcn
+            daqObj.ScansAvailableFcnCount = N;
+            daqObj.ScansAvailableFcn = @(src,evt) plotinputs(src,evt,inputGains,plotHandle);
+            plotoutputs(recordingCounter)
+            plottingCounter = 1;
+            triggerTime = now;
+            start(daqObj)
+            nTotalScans = length(output1);
+            while daqObj.NumScansAcquired<nTotalScans
                 if stopBackground
                     break
                 end
                 drawnow limitrate
             end
+            DAQPARS.triggerTime(backgroundCounter) = triggerTime;
+            pause(0.2) % give plotinputs time to finish
+            input1 = zeros(size(output1,1),numel(DAQPARS.inputChannels));
+            for jCount = 1:numel(DAQPARS.inputChannels)
+                input1(:,jCount) = get(plotHandle(jCount),'YData');
+            end
+            inputData(:,recordingCounter,:) = input1;
+            try
+                if DAQPARS.posthoc == true
+                    posthocanalysis(input1,recordingMode);
+                end
+            catch ME
+                DAQPARS.stability.ME = ME;
+            end
+            if backgroundCounter < nTotalSteps
+                while etime(clock,t0)<(DAQPARS.period/1000)
+                    if stopBackground
+                        break %#ok<*UNRCH>
+                    end
+                    drawnow limitrate
+                end
+                t0 = clock;
+            else
+                while daqObj.Running
+                    if stopBackground
+                        break
+                    end
+                    drawnow limitrate
+                end
+            end
+            if stopBackground
+                break
+            end
+            while (daqObj.NumScansQueued>0), drawnow limitrate; end
+            while (daqObj.NumScansAvailable>0), drawnow limitrate; end
+            if ~isempty(progressDialog)
+                progressDialog.Value = recordingCounter / nTotalSteps;
+                progressDialog.Message = ['Completed ',num2str(recordingCounter),' of ',num2str(nTotalSteps)];
+            end
+            recordingCounter = recordingCounter + 1;
+            Pars = rmfield(DAQPARS,'MainApp');
+            Pars.orderOfSteps = Pars.orderOfSteps(1:backgroundCounter);
+            descriptor = DAQPARS.MainApp.descriptorEditField.Value;
+            if isempty(descriptor)
+                fName = [DAQPARS.fileName,'.mat'];
+            else
+                fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
+            end
+            save([DAQPARS.saveDirectory,fName],...
+                'outputData','inputData','Pars','-nocompression')
         end
-        if stopBackground
-            break
-        end
-        while (daqObj.NumScansQueued>0), drawnow limitrate; end
-        while (daqObj.NumScansAvailable>0), drawnow limitrate; end
-        if ~isempty(progressDialog)
-            progressDialog.Value = recordingCounter / nTotalSteps;
-            progressDialog.Message = ['Completed ',num2str(recordingCounter),' of ',num2str(nTotalSteps)];       
-        end
-        recordingCounter = recordingCounter + 1;
-    end
-    Pars = rmfield(DAQPARS,'MainApp');
-    Pars.orderOfSteps = Pars.orderOfSteps(1:backgroundCounter);
-    descriptor = DAQPARS.MainApp.descriptorEditField.Value;
-    if isempty(descriptor)
-        fName = [DAQPARS.fileName,'.mat'];
-    else
-        fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
-    end
-    inputData = squeeze(inputData(:,1:backgroundCounter,:)); %#ok<*NODEF>
-    DAQPARS.orderOfSteps = DAQPARS.orderOfSteps(1:backgroundCounter);
-    daqreset
-    save([DAQPARS.saveDirectory,fName],...
-        'outputData','inputData','Pars','-nocompression')
-    if ishandle(progressFigure)
-        close(progressDialog);
-        close(progressFigure);
-    end
-    drawnow
-    if DAQPARS.MainApp.savedataCheckBox.Value
-        newexperiment('next trial')
-    else % move data to temp folder and append time
+        Pars = rmfield(DAQPARS,'MainApp');
+        Pars.orderOfSteps = Pars.orderOfSteps(1:backgroundCounter);
         descriptor = DAQPARS.MainApp.descriptorEditField.Value;
         if isempty(descriptor)
             fName = [DAQPARS.fileName,'.mat'];
         else
             fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
         end
-        fName1 = [DAQPARS.saveDirectory,fName];
-        tempName = [DAQPARS.saveDirectory,'temp\',datestr(now,30),'_',fName];
-        movefile(fName1, tempName)
+        inputData = squeeze(inputData(:,1:backgroundCounter,:)); %#ok<*NODEF>
+        DAQPARS.orderOfSteps = DAQPARS.orderOfSteps(1:backgroundCounter);
+        daqreset
+        save([DAQPARS.saveDirectory,fName],...
+            'outputData','inputData','Pars','-nocompression')
+
+        if ishandle(progressFigure)
+            close(progressDialog);
+            close(progressFigure);
+        end
+        drawnow
+        if strcmp(DAQPARS.MainApp.saveDropDown.Value,'save data')
+            newexperiment('next trial')
+            DAQPARS.preview.tempName = [];
+        else
+            descriptor = DAQPARS.MainApp.descriptorEditField.Value;
+            if isempty(descriptor)
+                fName = [DAQPARS.fileName,'.mat'];
+            else
+                fName = [DAQPARS.fileName,'_',descriptor,'.mat'];
+            end
+            DAQPARS.preview.fName1 = [DAQPARS.saveDirectory,fName];
+            DAQPARS.preview.tempName = [DAQPARS.saveDirectory,'temp\',datestr(now,30),'_',fName];
+            movefile(DAQPARS.preview.fName1, DAQPARS.preview.tempName)
+        end
+        set(DAQPARS.MainApp.startButton,'Text','start')
+        app.Recording = false;
+        warning('on')
     end
-    set(DAQPARS.MainApp.startButton,'Text','start')
-    app.Recording = false;
-    warning('on')
+
 end
 
 stopBackground = [];
