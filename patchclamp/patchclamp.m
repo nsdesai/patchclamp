@@ -45,7 +45,8 @@ if (nargin==0)                          % initialize
     assert(daqBoardOkay && amplifierOkay, ...
         'Check that the DAQ board and the amplifier are okay.')
     
-    
+    readmulticlamp(DAQPARS.MainApp)
+
     createsavedirectory                 % create folder in which to save
                                         % data
     
