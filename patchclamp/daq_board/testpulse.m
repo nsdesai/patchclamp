@@ -15,7 +15,7 @@ function [] = testpulse(app)
 %
 % Niraj S. Desai (NSD), 09/01/2020.
 % 
-% Last modified: NSD, 01/20/22
+% Last modified: NSD, 03/06/22
 
 global DAQPARS testObj %#ok<GVMIS> 
 
@@ -154,13 +154,26 @@ start(testObj,"RepeatOutput")
         for kk = 1:size(data,2)
             plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
             dataTemp1 = plotHandle(kk).YData;
-            deflection = mean(dataTemp1(pulseEnd-35:pulseEnd-5)) - mean(dataTemp1(25:50));
+            baseline = mean(dataTemp1(25:50));
+            deflection = mean(dataTemp1(pulseEnd-35:pulseEnd-5)) - baseline;
             if testChannelsType(kk)==0  % voltage clamp
                 R = abs(1000*amplitude/deflection); % MOhms
             else % current clamp
                 R = abs(1000*deflection/amplitude);
             end
-            rHandle(kk).YData(rIdx) = R;            
+            rHandle(kk).YData(rIdx) = R;   
+            if app.checkPropertiesButton.Value
+                if channelIdx(1) == str2double(app.channelDropDown.Value)
+                    app.inputresistanceEditField.Value = R;
+                    app.holdingcurrentEditField.Value = baseline;
+                    if testChannelsType(kk)==0 % voltage clamp
+                        maxDeflection = max(abs(deflection)) - baseline;
+                        Rs = abs(1000*amplitude/maxDeflection);
+                        app.seriesresistanceEditField.Value = Rs;
+                    end
+                end
+            end
+
         end
         rIdx = max(rem(rIdx+1,yPts),1);
         if rIdx==1
