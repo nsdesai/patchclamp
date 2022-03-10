@@ -1,5 +1,9 @@
-function [] = readmulticlamp(app)
+function [] = readmulticlamp(app,channelIdx)
 global DAQPARS
+
+if nargin < 2
+    channelIdx = [];
+end
 
 cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug\MulticlampControl.exe '];
 MulticlampTelegraph('start')
@@ -8,6 +12,12 @@ hWait = waitbar(0.2,'Please wait as we read amplifiers ...');
 DAQPARS.multiclampHolding = zeros(DAQPARS.nChannels,1);
 
 for ii = 1:numel(DAQPARS.amplifierIdx)
+
+    if ~isempty(channelIdx)
+        if DAQPARS.amplifierIdx(ii)~=channelIdx % read only the specified channel
+            continue
+        end
+    end
     
     s = ['statusDropDown_',num2str(ii)];
     g = ['gainDropDown_',num2str(ii)];
