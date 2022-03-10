@@ -19,17 +19,17 @@ nChannels = 8; % four with analog outputs, four with digital outputs
 
 status = cell(8,1);
 gain = ones(8,1);
-holding = ones(8,1);
+holding = ones(4,1); % only the first four (patch) channels have holding potentials or currents
 for ii = 1:nChannels
     
     s = ['statusDropDown_',num2str(ii)];
     g = ['gainDropDown_',num2str(ii)];
     h = ['holdingEditField_',num2str(ii)];
-   
+
     status{ii} = MainApp.(s).Value;
     gain(ii) = str2double(MainApp.(g).Value);
     holding(ii) = MainApp.(h).Value;
-    
+
 end
 
 DAQPARS.experimentNo = eNo;
