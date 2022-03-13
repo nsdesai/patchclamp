@@ -1,0 +1,2 @@
+C:\Users\niraj\Documents\MATLAB\patchclamp\patch_clamp_amplifier\MulticlampControl\MulticlampControl\Debug\MulticlampControl.exe
+C:\Users\niraj\Documents\MATLAB\patchclamp\patch_clamp_amplifier\MulticlampControl\MulticlampControl\Debug\MulticlampControl.pdb
