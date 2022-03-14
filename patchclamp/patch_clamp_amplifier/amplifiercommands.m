@@ -1,4 +1,4 @@
-function [amplifierOkay] = amplifiercommands(channelNo, cmd,bridge,dc,testSignal)
+function [amplifierOkay] = amplifiercommands(channelNo,cmd,bridge,dc,testSignal,gain)
 % function [amplifierOkay] = amplifiercommands(cmd,bridge,dc)
 %
 % This function works only for Multiclamp 700A/700B amplifiers.
@@ -28,16 +28,24 @@ function [amplifierOkay] = amplifiercommands(channelNo, cmd,bridge,dc,testSignal
 %           measure       put amplifier in voltage clamp with a gain of 1
 %                         and a holding potential of -70
 %           information   returns information about amplifier state
+%           testSignal    turn on the seal test
+%           recordingIC   put amplifier in current clamp with specified 
+%                         gain but no change in holding current
+%           recordingVC   put amplifier in voltage clamp with specified
+%                         gain and holding potential
+%
 % bridge    when in current clamp, the series resistance (MOhms) to use for
 %           for bridge balance
-% dc        steady current (pA) to inject in current clamp
+% dc        steady current (pA) to inject in current clamp or holding
+%           potential (mV) in voltage clamp
+% gain      amplifier gain
 %
 % OUTPUTS
 % amplifierOkay        true            no errors
 %                      false           errors
 % result               output from MulticlampControl.cpp
 %
-% Last modified: February 17, 2022 (NSD)
+% Last modified: March 4, 2022 (NSD)
 
 
 global DAQPARS
@@ -133,8 +141,22 @@ switch cmd
     case 'testSignal'
         
         mcCmd = [mcCmdPreamble,'8 ',testSignal];
+
+    case 'recordingIC'
+        
+        mcCmd = [mcCmdPreamble,'2 ',num2str(gain),' ','100000',' ','100000',' ',num2str(dc)];
+
+    case 'recordingVC'
+
+        mcCmd = [mcCmdPreamble,'3 ',num2str(gain),' ',num2str(dc)];
+
+    case 'recordingIZ'
+
+        mcCmd = [mcCmdPreamble,'6 ',num2str(gain)];
+        
         
     otherwise
+
 end
 
 % do it
