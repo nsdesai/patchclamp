@@ -113,7 +113,7 @@ dataTemp = readwrite(testObj,outputs,"OutputFormat","Matrix"); % used to set y-a
 dataTemp = dataTemp ./ repmat(inputGains(channelIdx),length(dataTemp),1);
 testObj.ScansAvailableFcnCount = N;
 testChannelsType = testChannelsType(channelIdx);
-testObj.ScansAvailableFcn = @(src,evt) plottestdata(src,app,channelIdx,testChannelsType,pulseEnd,amplitude,inputGains);
+testObj.ScansAvailableFcn = @(src,evt) plottestdata(src,app,channelIdx,testChannelsType,pulseStart,pulseEnd,amplitude,inputGains);
 
 % figure out where to plot the recordings
 app.UIPlottingChannels.Data = false(2,8);
@@ -149,7 +149,7 @@ preload(testObj,outputs)
 start(testObj,"RepeatOutput")
 
 % function that reads the data and plots it
-    function [] = plottestdata(obj,app,idx,testChannelsType,pulseEnd,amplitude,inputGains)
+    function [] = plottestdata(obj,app,idx,testChannelsType,pulseStart,pulseEnd,amplitude,inputGains)
         data = read(obj,obj.ScansAvailableFcnCount,"OutputFormat","Matrix");
         for kk = 1:size(data,2)
             plotHandle(kk).YData = data(:,kk)/inputGains(idx(kk));
@@ -163,11 +163,11 @@ start(testObj,"RepeatOutput")
             end
             rHandle(kk).YData(rIdx) = R;   
             if app.checkPropertiesButton.Value
-                if channelIdx(1) == str2double(app.channelDropDown.Value)
+                if channelIdx(1) == idx(kk)
                     app.inputresistanceEditField.Value = R;
                     app.holdingcurrentEditField.Value = baseline;
                     if testChannelsType(kk)==0 % voltage clamp
-                        maxDeflection = max(abs(deflection)) - baseline;
+                        maxDeflection = max(abs(dataTemp1(pulseStart-5:pulseStart+5)))-baseline;
                         Rs = abs(1000*amplitude/maxDeflection);
                         app.seriesresistanceEditField.Value = Rs;
                     end
