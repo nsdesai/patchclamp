@@ -13,7 +13,7 @@ if testPulseOn==true  % turn off test pulse momentarily
 end
 
 fStr = ['holdingEditField_',num2str(channelNum)];
-app.(fStr).Value = -70;
+app.(fStr).Value = -65;
 updateparameters(app)
 
 cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug\MulticlampControl.exe '];
