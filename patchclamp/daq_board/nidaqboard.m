@@ -19,8 +19,6 @@ s = daq("ni");
 
 s.Rate = DAQPARS.sampleRate;
 
-% idx = DAQPARS.daqBoardIdx; % identifier of the NIDAQ board to use
-
 aiChannels = DAQPARS.daqBoardChannels(1,DAQPARS.inputChannels);
 addinput(s,DAQPARS.daqBoardInfo.ID,aiChannels,"Voltage")
  

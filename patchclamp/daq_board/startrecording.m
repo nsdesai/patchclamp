@@ -49,7 +49,8 @@ multiclampSyncRequired = false;
 MulticlampTelegraph('start')
 for kk = 1:numel(DAQPARS.inputChannels)
     channelNo = DAQPARS.inputChannels(kk);
-    if ~strcmp(DAQPARS.amplifierInfo(channelNo).name(1:2),'MC')
+    channelName = DAQPARS.amplifierInfo(channelNo).name;
+    if isempty(channelName) || ~strcmp(channelName(1:2),'MC')
         continue
     end
     if DAQPARS.channelHolding(channelNo) ~= DAQPARS.multiclampHolding(channelNo)
@@ -217,7 +218,6 @@ DAQPARS.sex = DAQPARS.MainApp.sexSwitch.Value;
 
 % check that nidaq board is ready
 if ~isvalid(DAQPARS.daqObj)
-    daqreset
     DAQPARS.daqObj = nidaqboard;
 end
 
@@ -342,6 +342,7 @@ else
             xlim(ax(1),[0 DAQPARS.duration]);
             xlim(ax(2),[0 DAQPARS.duration]);
         end
+        delete(timerfindall)
         niTimer = timer('TimerFcn',...
             {@startdaq,inputGains,outputGains,progressDialog,plotHandle,recordingMode,completedSweepsField},...
             'StopFcn',{@stopdaq,progressDialog,progressFigure,completedSweepsField,totalSweepsField},...
