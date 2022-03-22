@@ -54,8 +54,6 @@ if ~isempty(channelStatusOld)
     if updateBoard
         channelOn = ~strcmp(DAQPARS.channelStatus,'off');
         DAQPARS.inputChannels = find(channelOn);
-        outputChannels = union(DAQPARS.outputChannels,DAQPARS.inputChannels);
-        DAQPARS.outputChannels = outputChannels(:)';
         DAQPARS.daqObj= nidaqboard;
     end
 end
