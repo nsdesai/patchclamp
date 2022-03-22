@@ -9,10 +9,6 @@ function [] = startrecording
 % and the gain specified in the DAQ figure. Display plans are readied. A 
 % data acquisition object is created. And finally the recording commences.
 %
-% Data acquisition uses a timer function ("niTimer"). If, for example, the
-% output is a family of N current steps (and the inputs a corresponding
-% family of voltage responses), the timer will execute N times.
-%
 
 
 global DAQPARS outputData inputData %#ok<*GVMIS> 
@@ -27,15 +23,6 @@ else
     stopBackground = 1;
     return
 end
-
-
-% if the user presses the stop button, execution is halted by eliminating
-% the timer, which triggers the timer's StopFcn.
-if ~isempty(timerfind('Tag','niTimer'))
-    stop(timerfind('Tag','niTimer'))
-    return
-end
-
 
 % make sure that at least one input channel has been selected
 channelOn = ~strcmp(DAQPARS.channelStatus,'off');
@@ -328,28 +315,6 @@ if loopRequested
     end
 else
 
-    if DAQPARS.duration <= 2000     % user timer and startForeground for short sweeps
-        cla(ax(1)); cla(ax(2));
-        hold(ax(1),'on'); hold(ax(2),'on')
-        for iCount = 1:numel(DAQPARS.inputChannels)
-            plotHandle(iCount) = plot(ax(ax1(iCount)), ...
-                dt:dt:DAQPARS.duration,...
-                NaN(length(outputData),1),...
-                'color',colors(DAQPARS.inputChannels(iCount),:)); %#ok<*SAGROW,*NASGU>
-        end
-        hold(ax(1),'off'); hold(ax(2),'off')
-        if ~popup
-            xlim(ax(1),[0 DAQPARS.duration]);
-            xlim(ax(2),[0 DAQPARS.duration]);
-        end
-        delete(timerfindall)
-        niTimer = timer('TimerFcn',...
-            {@startdaq,inputGains,outputGains,progressDialog,plotHandle,recordingMode,completedSweepsField},...
-            'StopFcn',{@stopdaq,progressDialog,progressFigure,completedSweepsField,totalSweepsField},...
-            'Period',DAQPARS.period/1000,'ExecutionMode','fixedRate',...
-            'BusyMode','queue','TasksToExecute',nTotalSteps,'Tag','niTimer');
-        start(niTimer)
-    else
         warning('off','MATLAB:subscripting:noSubscriptsSpecified');
         t0 = clock;
         for backgroundCounter = 1:nTotalSteps
@@ -482,7 +447,6 @@ else
         set(DAQPARS.MainApp.startButton,'Text','start')
         app.Recording = false;
         warning('on')
-    end
 
 end
 
