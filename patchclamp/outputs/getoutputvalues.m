@@ -39,11 +39,9 @@ if ~isempty(p.activeLines)
     end
     p.duration = duration;  % in case stimuli are longer than stated duration
 end
-if p.duration > 2000    % for long duration recordings, duration must be integer multiple of 100 msec
-    padding = rem(p.duration,100);
-    if padding
-        p.duration = p.duration + 100 - padding;
-    end
+padding = rem(p.duration,100); % durations must always be integer multiples of 100 msec
+if padding
+    p.duration = p.duration + 100 - padding;
 end
 MainApp.durationEditField.Value = p.duration;
 
