@@ -33,7 +33,8 @@ DAQPARS.duration = p.duration; % duration of each recording sweep
 lineOff = [];
 steps = ones(numel(p.activeLines),3);
 for iCount = 1:numel(p.activeLines)
-    
+
+
     % every output line has a time, a duration, and an amplitude.
     %
     % time is the starting time of the stimulus (msec), duration is how 
@@ -53,7 +54,7 @@ for iCount = 1:numel(p.activeLines)
         continue
     end    
     % time can be a row vector (one continuous output) or a column vector 
-    % (several outputs spaced by the period). duration and time are column
+    % (several outputs spaced by the period). duration and amplitude are column
     % vectors only
     durationLine = durationLine(:);
     amplitudeLine = amplitudeLine(:);
