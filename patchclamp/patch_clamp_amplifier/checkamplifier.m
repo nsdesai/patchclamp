@@ -14,7 +14,7 @@ function [amplifierOkay] = checkamplifier(amplifierInfo,amplifierIdx)
 %
 % OUTPUTS
 % amplifierOkay:     true or false   (amplifier)
-global DAQPARS
+global DAQPARS %#ok<*GVMIS> 
 
 amplifierOkay = true;
 
@@ -25,10 +25,10 @@ MulticlampTelegraph('stop')
 nChannels = numel(amplifierIdx);
 
 for ii = 1:nChannels
-    
+
     idx = amplifierIdx(ii);
-    specifiedID = amplifierInfo(idx).ID;
     if idx > 4, continue, end       % ignore manual settings
+    specifiedID = amplifierInfo(idx).ID;
     sStr = ['statusDropDown_',num2str(ii)];
     eStr = ['enableSwitch_',num2str(ii)];
     if ismember(specifiedID, detectedIDs)
