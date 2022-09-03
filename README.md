@@ -2,7 +2,6 @@
 Data acquisition software for patch clamp neurophysiology
 
 
-![](images/screenshot_GUI.png)
 
 
 REQUIREMENTS
