@@ -1,7 +1,6 @@
 # patchclamp
 Data acquisition software for patch clamp neurophysiology
 
-
 ![screenshot_GUI](https://user-images.githubusercontent.com/2991703/188282079-a434c57c-d798-4260-ad51-259754ccf6e8.png)
 
 REQUIREMENTS
