@@ -51,11 +51,21 @@ if (nargin==0)                          % initialize
                                         % data
     
     makefilename('initial')             % create file name for initial data
-    
+  
     updateparameters(DAQPARS.MainApp)
-    
+
     updateoutputs(DAQPARS.MainApp)
-    
+
+    channelOn = ~strcmp(DAQPARS.channelStatus,'off');
+    DAQPARS.inputChannels = find(channelOn);
+    if isempty(DAQPARS.inputChannels)
+        DAQPARS.MainApp.enableSwitch_1.Value = true;
+        DAQPARS.MainApp.statusDropDown_1.Value = 'field potential';
+        updateparameters(DAQPARS.MainApp)
+        DAQPARS.inputChannels = 1;
+    end
+    DAQPARS.daqObj = nidaqboard;
+
 else                                    % feval switchyard
     
     if (nargout)
