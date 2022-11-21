@@ -1,7 +1,9 @@
 function [] = writemulticlamp(~)
 global DAQPARS
 
-cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug\MulticlampControl.exe '];
+oldFolder = cd([DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug']);
+cmdPreamble = 'MulticlampControl.exe ';
+
 
 status = DAQPARS.channelStatus;
 gain = DAQPARS.channelGain;
@@ -57,5 +59,5 @@ for ii = 1:numel(DAQPARS.amplifierIdx)
 end
 
 close(hWait)
-
+cd(oldFolder)
 DAQPARS.multiclampHolding = DAQPARS.channelHolding;
