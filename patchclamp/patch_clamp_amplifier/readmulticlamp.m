@@ -5,9 +5,7 @@ if nargin < 2
     channelIdx = [];
 end
 
-oldFolder = cd([DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug']);
-cmdPreamble = 'MulticlampControl.exe ';
-
+cmdPreamble = [DAQPARS.daqFolder,'\patch_clamp_amplifier\MulticlampControl\Debug\MulticlampControl.exe '];
 MulticlampTelegraph('start')
 hWait = waitbar(0.2,'Please wait as we read amplifiers ...');
 
@@ -83,6 +81,5 @@ end
 
 close(hWait)
 MulticlampTelegraph('stop')
-cd(oldFolder)
 
 updateparameters(app,results)
