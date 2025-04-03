@@ -11,12 +11,14 @@ function [varargout] = patchclamp(varargin)
 % array called DAQPARS. It is global and used by most of the DAQ functions.
 %
 % Written by Niraj S. Desai (NSD)
-% Last modified: June 7, 2020
+% Last modified: April 4, 2025
 
-global DAQPARS
+global DAQPARS %#ok<GVMIS>
 
 if (nargin==0)                          % initialize
     
+    DAQPARS = [];
+
     % All the DAQ files should be in the "patchclamp" folder inside the
     % Matlab work folder 
     % (e.g., C:\Users\MyName\Documents\MATLAB\patchclamp).
@@ -59,7 +61,7 @@ if (nargin==0)                          % initialize
     channelOn = ~strcmp(DAQPARS.channelStatus,'off');
     DAQPARS.inputChannels = find(channelOn);
     if isempty(DAQPARS.inputChannels)
-        DAQPARS.MainApp.enableSwitch_1.Value = true;
+        DAQPARS.MainApp.enableSwitch_1.Value = 'enable';
         DAQPARS.MainApp.statusDropDown_1.Value = 'field potential';
         updateparameters(DAQPARS.MainApp)
         DAQPARS.inputChannels = 1;
