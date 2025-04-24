@@ -203,10 +203,9 @@ DAQPARS.mouseid = DAQPARS.MainApp.mouseidEditField.Value;
 DAQPARS.DOB = DAQPARS.MainApp.DOBDatePicker.Value;
 DAQPARS.sex = DAQPARS.MainApp.sexSwitch.Value;
 
+
 % check that nidaq board is ready
-if ~isvalid(DAQPARS.daqObj)
-    DAQPARS.daqObj = nidaqboard;
-end
+DAQPARS.daqObj = nidaqboard;
 
 
 % posthoc analysis: yes or no
