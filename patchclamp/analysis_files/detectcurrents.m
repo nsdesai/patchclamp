@@ -13,7 +13,7 @@ if isempty(data), return, end
 
 % identify the series resistance test pulse, to ignore events near it
 testPulsePts = find(holding~=mode(holding));
-testPulsePts = unique([testPulsePts, testPulsePts - round(100)]);
+testPulsePts = unique([testPulsePts, testPulsePts - round(100), testPulsePts + round(100)]);
 
 if ap.sixtyHz
     try     % 60 Hz notch filter
